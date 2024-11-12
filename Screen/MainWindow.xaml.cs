@@ -35,6 +35,7 @@ public partial class MainWindow
     private bool _isSelecting;
     private System.Windows.Shapes.Rectangle _selectionRectangle;
     private Point _startPoint;
+    private int count = 0;
     public readonly List<Window> _overlays = new();
 
     public MainWindow()
@@ -103,13 +104,14 @@ public partial class MainWindow
         };
 
         overlay.Show();
-        _overlays.Add(overlay);
 
         overlay.MouseLeftButtonUp += Overlay_MouseLeftButtonUp;
         overlay.MouseLeftButtonDown += Overlay_MouseLeftButtonDown;
         overlay.MouseMove += Overlay_MouseMove;
 
         overlay.KeyUp += HandleEscapeKey;
+        _overlays.Add(overlay);
+
     }
 
     private void HandleEscapeKey(object sender, KeyEventArgs args)
@@ -127,7 +129,9 @@ public partial class MainWindow
 
     private void Overlay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+       
         _isSelecting = false;
+        Console.WriteLine($"If mouse button up false: {_isSelecting}");
 
         Dispatcher.BeginInvoke(new Action(() =>
         {
@@ -197,13 +201,17 @@ public partial class MainWindow
 
     private void Overlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (_isSelecting)
+        {
+            return;
+        }
         _isSelecting = true;
         var overlay = (Window)sender;
-    
-        // Получение начальной точки для выделения
+
+        // Устанавливаем начальную точку выделения
         _startPoint = e.GetPosition(overlay);
 
-        // Создание прямоугольника для выделенной области
+        // Создаем прямоугольник для выделенной области
         _selectionRectangle = new System.Windows.Shapes.Rectangle
         {
             Fill = System.Windows.Media.Brushes.Transparent,
@@ -211,17 +219,18 @@ public partial class MainWindow
             StrokeThickness = 2
         };
 
-        // Добавляем прямоугольник в контейнер
+        // Добавляем прямоугольник в Canvas и устанавливаем в качестве содержимого overlay
         var canvas = new Canvas();
         canvas.Children.Add(_selectionRectangle);
         overlay.Content = canvas;
 
-        // Установка маски для окна
-        var clipGeometry = new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height));
-        var selectionGeometry = new RectangleGeometry(new Rect(_startPoint, new Size(0, 0)));
-        var combinedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
-        overlay.Clip = combinedGeometry;
+        // Устанавливаем начальное положение и размер выделенной области
+        Canvas.SetLeft(_selectionRectangle, _startPoint.X);
+        Canvas.SetTop(_selectionRectangle, _startPoint.Y);
+        _selectionRectangle.Width = 0;
+        _selectionRectangle.Height = 0;
     }
+
 
     // Проверка, на каком экране находится окно (overlay)
     private bool IsOverlayOnScreen(Window overlay, System.Windows.Forms.Screen screen)
@@ -280,17 +289,39 @@ public partial class MainWindow
 
     private void Overlay_MouseMove(object sender, MouseEventArgs e)
     {
+        Console.WriteLine($"If mouse button down: {_isSelecting}");
         if (_isSelecting)
         {
-            var endPoint = e.GetPosition((UIElement)sender);
-            UpdateSelectionRectangle(endPoint);
-        
-            // Обновление геометрии маски при изменении выделенной области
             var overlay = (Window)sender;
-            var clipGeometry = new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height));
-            var selectionGeometry = new RectangleGeometry(new Rect(_startPoint, new Size(_selectionRectangle.Width, _selectionRectangle.Height)));
+
+            // Получаем конечную точку выделения
+            var endPoint = e.GetPosition(overlay);
+
+            // Определяем верхнюю левую и нижнюю правую точки для корректного обновления прямоугольника
+            double x = Math.Min(_startPoint.X, endPoint.X);
+            double y = Math.Min(_startPoint.Y, endPoint.Y);
+            double width = Math.Abs(_startPoint.X - endPoint.X);
+            double height = Math.Abs(_startPoint.Y - endPoint.Y);
+
+            // Обновляем позицию и размеры _selectionRectangle
+            Canvas.SetLeft(_selectionRectangle, x);
+            Canvas.SetTop(_selectionRectangle, y);
+            _selectionRectangle.Width = width;
+            _selectionRectangle.Height = height;
+
+            // Создаем геометрию для выделенной области и устанавливаем маску для overlay
+            var overlayRect = new Rect(0, 0, overlay.Width, overlay.Height);
+            var selectionRect = new Rect(x, y, width, height);
+
+            var clipGeometry = new RectangleGeometry(overlayRect);
+            var selectionGeometry = new RectangleGeometry(selectionRect);
             var combinedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
             overlay.Clip = combinedGeometry;
         }
+        else
+        {
+            Console.WriteLine($"Тест: {++count}");
+        }
     }
+
 }
