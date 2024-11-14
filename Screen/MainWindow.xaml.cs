@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using Screen.Services;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -39,11 +40,13 @@ public partial class MainWindow
     private Point _startPoint;
     public readonly List<Window> _overlays = new();
 
+    private ClipService clipService;
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         InitializeComponent();
         InitializeTrayIcon();
+        clipService = new ClipService(ImageCanvas);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -333,5 +336,16 @@ public partial class MainWindow
             var combinedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
             overlay.Clip = combinedGeometry;
         }
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var startPosition = new Point(50, 50);
+        clipService.AddRectangle(startPosition);
     }
 }
