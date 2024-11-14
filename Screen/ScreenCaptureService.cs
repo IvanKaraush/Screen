@@ -70,6 +70,84 @@ public class ScreenCaptureService
         return overlayBlackOut;
     }
 
+    public void StartCapture(Window overlay, Point startPosition)
+    {
+        if (_isSelecting)
+        {
+            return;
+        }
+
+        _isSelecting = true;
+        _startPoint = startPosition;
+        _selectionRectangle = new Rectangle
+        {
+            Fill = Brushes.Transparent,
+            Stroke = Brushes.White,
+            StrokeThickness = 2
+        };
+
+        var canvas = new Canvas();
+        canvas.Children.Add(_selectionRectangle);
+        overlay.Content = canvas;
+
+        Canvas.SetLeft(_selectionRectangle, _startPoint.X);
+        Canvas.SetTop(_selectionRectangle, _startPoint.Y);
+        _selectionRectangle.Width = 0;
+        _selectionRectangle.Height = 0;
+    }
+
+    public Bitmap StopCapture()
+    {
+        _isSelecting = false;
+
+        foreach (var overlay in Overlays)
+        {
+            overlay.Hide();
+            overlay.Close();
+        }
+
+        Overlays.Clear();
+        return CaptureScreenshot();
+    }
+
+    public void ChangeScreenFigure(Window overlay, Point startPosition)
+    {
+        if (!_isSelecting)
+        {
+            return;
+        }
+
+        var endPoint = startPosition;
+
+        var x = Math.Min(_startPoint.X, endPoint.X);
+        var y = Math.Min(_startPoint.Y, endPoint.Y);
+        var width = Math.Abs(_startPoint.X - endPoint.X);
+        var height = Math.Abs(_startPoint.Y - endPoint.Y);
+        if (_selectionRectangle == null)
+        {
+            return;
+        }
+
+        Canvas.SetLeft(_selectionRectangle, x);
+        Canvas.SetTop(_selectionRectangle, y);
+        _selectionRectangle.Width = width;
+        _selectionRectangle.Height = height;
+
+        if (_selectionRectangle.IsLoaded)
+        {
+            return;
+        }
+
+        var overlayRect = new Rect(0, 0, overlay.Width, overlay.Height);
+        var selectionRect = new Rect(x, y, width, height);
+
+        var clipGeometry = new RectangleGeometry(overlayRect);
+        var selectionGeometry = new RectangleGeometry(selectionRect);
+        var combinedGeometry =
+            new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
+        overlay.Clip = combinedGeometry;
+    }
+
     public ImageSource BitmapToImageSource(Bitmap bitmap)
     {
         using (var memoryStream = new MemoryStream())
@@ -149,83 +227,5 @@ public class ScreenCaptureService
                 return bitmapImage;
             }
         }
-    }
-
-    public void StartCapture(Window overlay, Point startPosition)
-    {
-        if (_isSelecting)
-        {
-            return;
-        }
-
-        _isSelecting = true;
-        _startPoint = startPosition;
-        _selectionRectangle = new Rectangle
-        {
-            Fill = Brushes.Transparent,
-            Stroke = Brushes.White,
-            StrokeThickness = 2
-        };
-
-        var canvas = new Canvas();
-        canvas.Children.Add(_selectionRectangle);
-        overlay.Content = canvas;
-
-        Canvas.SetLeft(_selectionRectangle, _startPoint.X);
-        Canvas.SetTop(_selectionRectangle, _startPoint.Y);
-        _selectionRectangle.Width = 0;
-        _selectionRectangle.Height = 0;
-    }
-
-    public Bitmap StopCapture()
-    {
-        _isSelecting = false;
-
-        foreach (var overlay in Overlays)
-        {
-            overlay.Hide();
-            overlay.Close();
-        }
-
-        Overlays.Clear();
-        return CaptureScreenshot();
-    }
-
-    public void ChangeScreenFigure(Window overlay, Point startPosition)
-    {
-        if (!_isSelecting)
-        {
-            return;
-        }
-
-        var endPoint = startPosition;
-
-        var x = Math.Min(_startPoint.X, endPoint.X);
-        var y = Math.Min(_startPoint.Y, endPoint.Y);
-        var width = Math.Abs(_startPoint.X - endPoint.X);
-        var height = Math.Abs(_startPoint.Y - endPoint.Y);
-        if (_selectionRectangle == null)
-        {
-            return;
-        }
-
-        Canvas.SetLeft(_selectionRectangle, x);
-        Canvas.SetTop(_selectionRectangle, y);
-        _selectionRectangle.Width = width;
-        _selectionRectangle.Height = height;
-
-        if (_selectionRectangle.IsLoaded)
-        {
-            return;
-        }
-
-        var overlayRect = new Rect(0, 0, overlay.Width, overlay.Height);
-        var selectionRect = new Rect(x, y, width, height);
-
-        var clipGeometry = new RectangleGeometry(overlayRect);
-        var selectionGeometry = new RectangleGeometry(selectionRect);
-        var combinedGeometry =
-            new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
-        overlay.Clip = combinedGeometry;
     }
 }

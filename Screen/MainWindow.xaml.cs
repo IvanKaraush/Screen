@@ -38,6 +38,16 @@ public partial class MainWindow
         ComponentDispatcher.ThreadPreprocessMessage += ComponentDispatcher_ThreadPreprocessMessage;
     }
 
+    protected override void OnClosed(EventArgs e)
+    {
+        var helper = new WindowInteropHelper(this);
+        UnregisterHotKey(helper.Handle, HotkeyId);
+        ComponentDispatcher.ThreadPreprocessMessage -= ComponentDispatcher_ThreadPreprocessMessage;
+
+        _trayIcon.Visible = false;
+        _trayIcon.Dispose();
+    }
+
     private void InitializeTrayIcon()
     {
         _trayIcon = new NotifyIcon
@@ -61,12 +71,12 @@ public partial class MainWindow
             _printScreenPressed = true;
             foreach (var screen in _screenCaptureService.Screens)
             {
-               var overlay = _screenCaptureService.StartScreenCapture(screen);
-               overlay.MouseLeftButtonUp += Overlay_MouseLeftButtonUp;
-               overlay.MouseLeftButtonDown += Overlay_MouseLeftButtonDown;
-               overlay.MouseMove += Overlay_MouseMove;
+                var overlay = _screenCaptureService.StartScreenCapture(screen);
+                overlay.MouseLeftButtonUp += Overlay_MouseLeftButtonUp;
+                overlay.MouseLeftButtonDown += Overlay_MouseLeftButtonDown;
+                overlay.MouseMove += Overlay_MouseMove;
 
-               overlay.KeyUp += HandleEscapeKey;
+                overlay.KeyUp += HandleEscapeKey;
             }
 
             handled = true;
@@ -101,7 +111,7 @@ public partial class MainWindow
     private void Overlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         var overlay = (Window)sender;
-       _screenCaptureService.StartCapture(overlay, e.GetPosition(overlay));
+        _screenCaptureService.StartCapture(overlay, e.GetPosition(overlay));
     }
 
     private void ShowWindow(object? sender, EventArgs e)
@@ -116,16 +126,6 @@ public partial class MainWindow
         _trayIcon.Visible = false;
         _trayIcon.Dispose();
         Application.Current.Shutdown();
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        var helper = new WindowInteropHelper(this);
-        UnregisterHotKey(helper.Handle, HotkeyId);
-        ComponentDispatcher.ThreadPreprocessMessage -= ComponentDispatcher_ThreadPreprocessMessage;
-
-        _trayIcon.Visible = false;
-        _trayIcon.Dispose();
     }
 
     private void Overlay_MouseMove(object sender, MouseEventArgs e)
