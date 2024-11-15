@@ -17,11 +17,11 @@ namespace Screen;
 
 public class ScreenCaptureService
 {
-    public System.Windows.Forms.Screen[] Screens { get; private set; } = System.Windows.Forms.Screen.AllScreens;
+    public System.Windows.Forms.Screen[] Screens { get; } = System.Windows.Forms.Screen.AllScreens;
     private bool _isSelecting;
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
-    public List<Window> Overlays { get; private set; } = [];
+    public List<Window> Overlays { get; } = [];
 
     public Window StartScreenCapture(System.Windows.Forms.Screen screen)
     {
