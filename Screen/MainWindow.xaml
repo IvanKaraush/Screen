@@ -15,7 +15,7 @@
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
             </Button>
 			<Button Width="80" Height="80" Click="Button_Click">
-				<TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
+                <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
             <Button Width="80" Height="80" Click="AddRectangleButton_Click">
                 <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
@@ -23,20 +23,40 @@
             <Button Width="80" Height="80">
                 <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80">
+            <Button Width="80" Height="80" Click="DrawArrowButton_Click" >
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
             </Button>
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">T</TextBlock>
             </Button>
+            <ComboBox Width="50" Height="30" SelectedIndex="0" Name="ColorPickerComboBox">
+                <ComboBox.Items>
+                    <ComboBoxItem>
+                        <Rectangle Width="20" Height="20" Fill="Red"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Width="20" Height="20" Fill="Green"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Width="20" Height="20" Fill="Blue"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Width="20" Height="20" Fill="Yellow"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Width="20" Height="20" Fill="Black"/>
+                    </ComboBoxItem>
+                </ComboBox.Items>
+            </ComboBox>
         </ToolBar>
         
         <!-- Область для изображения, которая изменяет размер вместе с окном -->
-		<ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-			<Canvas x:Name="ImageCanvas">
-			    <Image x:Name="PreviewImage" Stretch="None" />
-			</Canvas>
-		</ScrollViewer>
+        <ScrollViewer x:Name="ImageScrollViewer" Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Canvas x:Name="ImageCanvas">
+                <Image x:Name="PreviewImage" Stretch="None"/>
+            </Canvas>
+        </ScrollViewer>
 
-	</Grid>
+
+    </Grid>
 </Window>
