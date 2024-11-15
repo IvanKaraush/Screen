@@ -1,4 +1,3 @@
-﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -23,12 +22,14 @@ public partial class MainWindow
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
 
+    private ClipService clipService;
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
         InitializeComponent();
         InitializeTrayIcon();
+        clipService = new ClipService(ImageCanvas);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -132,5 +133,16 @@ public partial class MainWindow
     {
         var overlay = (Window)sender;
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var startPosition = new Point(50, 50);
+        clipService.AddRectangle(startPosition);
     }
 }
