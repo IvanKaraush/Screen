@@ -1,9 +1,12 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Screen.Services;
 using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Windows.Point;
 
 namespace Screen;
 
@@ -22,14 +25,14 @@ public partial class MainWindow
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
 
-    private ClipService clipService;
+    private readonly ClipService _clipService;
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
         InitializeComponent();
         InitializeTrayIcon();
-        clipService = new ClipService(ImageCanvas);
+        _clipService = new ClipService(ImageCanvas);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -143,6 +146,6 @@ public partial class MainWindow
     private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
     {
         var startPosition = new Point(50, 50);
-        clipService.AddRectangle(startPosition);
+        _clipService.AddRectangle(startPosition);
     }
 }
