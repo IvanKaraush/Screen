@@ -21,7 +21,7 @@ public class ScreenCaptureService
     private bool _isSelecting;
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
-    public List<Window> Overlays { get; } = [];
+    public List<Window> Overlays { get; } =  [];
 
     public Window StartScreenCapture(System.Windows.Forms.Screen screen)
     {
@@ -38,7 +38,7 @@ public class ScreenCaptureService
             Cursor = Cursors.Cross,
             Content = new System.Windows.Controls.Image
             {
-                Source = MakeScreenshot(),
+                Source = MakeScreenshot(screen),
                 Stretch = Stretch.Uniform
             }
         };
@@ -60,6 +60,7 @@ public class ScreenCaptureService
                 Text = "Выберите область экрана с помощью мыши или нажмите Esc для выхода",
                 Foreground = new SolidColorBrush(Colors.White)
             },
+            Name = "Black"
         };
 
         overlay.Show();
@@ -99,6 +100,13 @@ public class ScreenCaptureService
     public Bitmap StopCapture()
     {
         _isSelecting = false;
+        foreach (var overlay in Overlays.Where(c => c.Name == "Black").ToList())
+        {
+            overlay.Hide();
+            overlay.Close();
+        }
+
+        var screenshot = CaptureScreenshot();
 
         foreach (var overlay in Overlays)
         {
@@ -107,7 +115,7 @@ public class ScreenCaptureService
         }
 
         Overlays.Clear();
-        return CaptureScreenshot();
+        return screenshot;
     }
 
     public void ChangeScreenFigure(Window overlay, Point startPosition)
@@ -185,15 +193,13 @@ public class ScreenCaptureService
         throw new NullReferenceException("Выбранная фигура не может быть null");
     }
 
-    private BitmapImage MakeScreenshot()
+    private BitmapImage MakeScreenshot(System.Windows.Forms.Screen screen)
     {
-        var screenBounds = Screens[0].Bounds;
-
-        using (var bitmap = new Bitmap(screenBounds.Width, screenBounds.Height))
+        using (var bitmap = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
         {
             using (var graphics = Graphics.FromImage(bitmap))
             {
-                graphics.CopyFromScreen(screenBounds.Location, System.Drawing.Point.Empty, screenBounds.Size);
+                graphics.CopyFromScreen(screen.Bounds.Location, System.Drawing.Point.Empty, screen.Bounds.Size);
             }
 
             using (var memoryStream = new MemoryStream())

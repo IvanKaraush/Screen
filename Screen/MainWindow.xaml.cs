@@ -110,6 +110,7 @@ public partial class MainWindow
     private void Overlay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         ShowPreviewWindow(_screenCaptureService.StopCapture());
+        
     }
 
     private void ShowPreviewWindow(Bitmap screenshot)
