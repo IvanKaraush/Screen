@@ -13,7 +13,7 @@ using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Size = System.Drawing.Size;
 
-namespace Screen;
+namespace Screen.Services;
 
 public class ScreenCaptureService
 {
@@ -146,22 +146,6 @@ public class ScreenCaptureService
         var combinedGeometry =
             new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
         overlay.Clip = combinedGeometry;
-    }
-
-    public ImageSource BitmapToImageSource(Bitmap bitmap)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            bitmap.Save(memoryStream, ImageFormat.Bmp);
-            memoryStream.Position = 0;
-            var bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.StreamSource = memoryStream;
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-
-            bitmapImage.EndInit();
-            return bitmapImage;
-        }
     }
 
     private Bitmap CaptureScreenshot()
