@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Screen.Models;
@@ -141,14 +142,18 @@ public partial class MainWindow
     }
     private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        _viewModel.MouseDown(DrawingCanvas, e.GetPosition(DrawingCanvas));
+        var canvas = sender as Canvas;
+        var startPoint = e.GetPosition(canvas);
+        _viewModel.MouseDown(canvas, startPoint);
     }
 
     private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
+        var canvas = sender as Canvas;
+        var currentPoint = e.GetPosition(canvas);
         if (e.LeftButton == MouseButtonState.Pressed)
         {
-            _viewModel.MouseMove(DrawingCanvas, e.GetPosition(DrawingCanvas));
+            _viewModel.MouseMove(canvas, currentPoint);
         }
     }
 
@@ -156,5 +161,7 @@ public partial class MainWindow
     {
         _viewModel.MouseUp();
     }
+
+
 
 }

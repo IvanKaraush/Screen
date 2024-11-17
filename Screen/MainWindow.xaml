@@ -23,31 +23,47 @@
             <Button Width="80" Height="80" Command="{Binding DrawEllipseCommand}">
                 <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80" >
+            <Button Width="80" Height="80" Command="{Binding DrawArrowCommand}">
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
+            </Button>
+            <Button Width="80" Height="80" Command="{Binding DrawLineCommand}">
+                <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">—</TextBlock>
             </Button>
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">T</TextBlock>
             </Button>
-            <ComboBox Width="50" Height="30" SelectedIndex="0" Name="ColorPickerComboBox">
+            <ComboBox Width="50" Height="30" SelectedItem="{Binding SelectedBrush, Mode=TwoWay}" Name="ColorPickerComboBox">
                 <ComboBox.Items>
                     <ComboBoxItem>
-                        <Rectangle Width="20" Height="20" Fill="Red"/>
+                        <ComboBoxItem.Content>
+                            <Rectangle Width="20" Height="20" Fill="Red"/>
+                        </ComboBoxItem.Content>
                     </ComboBoxItem>
                     <ComboBoxItem>
-                        <Rectangle Width="20" Height="20" Fill="Green"/>
+                        <ComboBoxItem.Content>
+                            <Rectangle Width="20" Height="20" Fill="Green"/>
+                        </ComboBoxItem.Content>
                     </ComboBoxItem>
                     <ComboBoxItem>
-                        <Rectangle Width="20" Height="20" Fill="Blue"/>
+                        <ComboBoxItem.Content>
+                            <Rectangle Width="20" Height="20" Fill="Blue"/>
+                        </ComboBoxItem.Content>
                     </ComboBoxItem>
                     <ComboBoxItem>
-                        <Rectangle Width="20" Height="20" Fill="Yellow"/>
+                        <ComboBoxItem.Content>
+                            <Rectangle Width="20" Height="20" Fill="Yellow"/>
+                        </ComboBoxItem.Content>
                     </ComboBoxItem>
                     <ComboBoxItem>
-                        <Rectangle Width="20" Height="20" Fill="Black"/>
+                        <ComboBoxItem.Content>
+                            <Rectangle Width="20" Height="20" Fill="Black"/>
+                        </ComboBoxItem.Content>
                     </ComboBoxItem>
                 </ComboBox.Items>
             </ComboBox>
+
+
+
         </ToolBar>
         
         <!-- Область для изображения, которая изменяет размер вместе с окном -->

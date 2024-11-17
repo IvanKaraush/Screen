@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
+using Brush = System.Windows.Media.Brush;
 
 namespace Screen.Services
 {
@@ -13,13 +14,14 @@ namespace Screen.Services
         private Rectangle _currentRectangle;
         private Point _startPoint;
 
-        public void MouseDown(Canvas canvas, System.Windows.Point startPoint)
+        public void MouseDown(Canvas canvas, Point startPoint, Brush color, bool isCtrlPressed)
         {
             _startPoint = startPoint;
             _currentRectangle = new Rectangle
             {
-                Stroke = Brushes.Black,
-                StrokeThickness = 2
+                Stroke = color,
+                StrokeThickness = 2,
+                Fill = isCtrlPressed ? color : Brushes.Transparent
             };
             Canvas.SetLeft(_currentRectangle, _startPoint.X);
             Canvas.SetTop(_currentRectangle, _startPoint.Y);
