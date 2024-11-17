@@ -28,7 +28,6 @@ public partial class MainWindow
 
 
     public MainWindow()
-    
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();

@@ -32,48 +32,36 @@
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">T</TextBlock>
             </Button>
-            <ComboBox Width="50" Height="30" SelectedItem="{Binding SelectedBrush, Mode=TwoWay}" Name="ColorPickerComboBox">
+            <ComboBox Width="50" Height="30" SelectedItem="{Binding SelectedBrush, Mode=TwoWay}">
                 <ComboBox.Items>
-                    <ComboBoxItem>
-                        <ComboBoxItem.Content>
-                            <Rectangle Width="20" Height="20" Fill="Red"/>
-                        </ComboBoxItem.Content>
-                    </ComboBoxItem>
-                    <ComboBoxItem>
-                        <ComboBoxItem.Content>
-                            <Rectangle Width="20" Height="20" Fill="Green"/>
-                        </ComboBoxItem.Content>
-                    </ComboBoxItem>
-                    <ComboBoxItem>
-                        <ComboBoxItem.Content>
-                            <Rectangle Width="20" Height="20" Fill="Blue"/>
-                        </ComboBoxItem.Content>
-                    </ComboBoxItem>
-                    <ComboBoxItem>
-                        <ComboBoxItem.Content>
-                            <Rectangle Width="20" Height="20" Fill="Yellow"/>
-                        </ComboBoxItem.Content>
-                    </ComboBoxItem>
-                    <ComboBoxItem>
-                        <ComboBoxItem.Content>
-                            <Rectangle Width="20" Height="20" Fill="Black"/>
-                        </ComboBoxItem.Content>
-                    </ComboBoxItem>
+                    <SolidColorBrush Color="Red"/>
+                    <SolidColorBrush Color="Green"/>
+                    <SolidColorBrush Color="Blue"/>
+                    <SolidColorBrush Color="Yellow"/>
+                    <SolidColorBrush Color="Black"/>
                 </ComboBox.Items>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle Width="20" Height="20" Fill="{Binding}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
+
+
+
 
 
 
         </ToolBar>
         
-        <!-- Область для изображения, которая изменяет размер вместе с окном -->
-        <ScrollViewer x:Name="ImageScrollViewer" Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <Canvas x:Name="DrawingCanvas"  MouseDown="Canvas_MouseDown" 
+        <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Canvas x:Name="DrawingCanvas" MouseDown="Canvas_MouseDown" 
                     MouseMove="Canvas_MouseMove" 
                     MouseUp="Canvas_MouseUp">
                 <Image x:Name="PreviewImage" Stretch="None"/>
             </Canvas>
         </ScrollViewer>
+
 
 
     </Grid>
