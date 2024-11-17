@@ -2,78 +2,49 @@
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
-using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace Screen.Services
 {
-    internal class ClipService
+    public class ClipService
     {
-        private Rectangle rectangle;
-        private Canvas canvas;
-        private bool isResizing = false;
-        private Point startPoint;
-        public ClipService(Canvas canvas)
+        private Rectangle _currentRectangle;
+        private Point _startPoint;
+
+        public void MouseDown(Canvas canvas, System.Windows.Point startPoint)
         {
-            this.canvas = canvas;
-        }
-        public void AddRectangle(Point initialPosition, double initialWidth = 100, double initialHeight = 75)
-        {
-            // Создаем прямоугольник
-            rectangle = new Rectangle
+            _startPoint = startPoint;
+            _currentRectangle = new Rectangle
             {
-                Stroke = Brushes.Blue,
-                StrokeThickness = 2,
-                Fill = Brushes.Transparent,
-                Width = initialWidth,
-                Height = initialHeight
+                Stroke = Brushes.Black,
+                StrokeThickness = 2
             };
-
-            // Устанавливаем начальную позицию прямоугольника
-            Canvas.SetLeft(rectangle, initialPosition.X);
-            Canvas.SetTop(rectangle, initialPosition.Y);
-
-            // Добавляем прямоугольник на Canvas
-            canvas.Children.Add(rectangle);
-
-            // Подключаем события для изменения размеров
-            canvas.MouseDown += Canvas_MouseDown;
-            canvas.MouseMove += Canvas_MouseMove;
-            canvas.MouseUp += Canvas_MouseUp;
+            Canvas.SetLeft(_currentRectangle, _startPoint.X);
+            Canvas.SetTop(_currentRectangle, _startPoint.Y);
+            canvas.Children.Add(_currentRectangle);
         }
 
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        public void MouseMove(Canvas canvas, System.Windows.Point currentPoint)
         {
-            if (rectangle != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                startPoint = e.GetPosition(canvas);
-                isResizing = true;
-            }
+            if (_currentRectangle == null) return;
+
+            var x = Math.Min(_startPoint.X, currentPoint.X);
+            var y = Math.Min(_startPoint.Y, currentPoint.Y);
+            var width = Math.Abs(_startPoint.X - currentPoint.X);
+            var height = Math.Abs(_startPoint.Y - currentPoint.Y);
+
+            Canvas.SetLeft(_currentRectangle, x);
+            Canvas.SetTop(_currentRectangle, y);
+            _currentRectangle.Width = width;
+            _currentRectangle.Height = height;
         }
 
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+
+        public void MouseUp()
         {
-            if (isResizing && rectangle != null)
-            {
-                var currentPoint = e.GetPosition(canvas);
-
-                var width = Math.Abs(currentPoint.X - startPoint.X);
-                var height = Math.Abs(currentPoint.Y - startPoint.Y);
-
-                rectangle.Width = width;
-                rectangle.Height = height;
-
-                Canvas.SetLeft(rectangle, Math.Min(currentPoint.X, startPoint.X));
-                Canvas.SetTop(rectangle, Math.Min(currentPoint.Y, startPoint.Y));
-            }
-        }
-
-        private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            isResizing = false;
+            _currentRectangle = null;
         }
     }
 }

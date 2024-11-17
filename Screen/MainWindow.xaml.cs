@@ -2,14 +2,10 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using Screen.Services;
+using Screen.Models;
 using Application = System.Windows.Application;
-using Brush = System.Windows.Media.Brush;
-using Color = System.Drawing.Color;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using Point = System.Windows.Point;
 
 namespace Screen;
 
@@ -27,20 +23,18 @@ public partial class MainWindow
     private NotifyIcon _trayIcon;
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
+    private readonly MainViewModel _viewModel;
 
-    private readonly ClipService _clipService;
-    private readonly DrawArrow _drawArrow;
-    private bool _isDrawingArrow;
-    private static readonly Color DrawingColor = Color.Black;
-    private readonly Brush _selectedColor = new SolidColorBrush(System.Windows.Media.Color.FromArgb(DrawingColor.A, DrawingColor.R, DrawingColor.G, DrawingColor.B));    public MainWindow()
+
+    public MainWindow()
     
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
         InitializeComponent();
         InitializeTrayIcon();
-        _clipService = new ClipService(ImageCanvas);
-        _drawArrow = new DrawArrow(ImageCanvas, _selectedColor);
+        _viewModel = new MainViewModel();
+        DataContext = _viewModel;
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -145,48 +139,22 @@ public partial class MainWindow
         var overlay = (Window)sender;
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
     }
-
-    private void Button_Click(object sender, RoutedEventArgs e)
+    private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
     {
-
+        _viewModel.MouseDown(DrawingCanvas, e.GetPosition(DrawingCanvas));
     }
 
-    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
-        var startPosition = new Point(50, 50);
-        _clipService.AddRectangle(startPosition);
-    }
-
-    private void DrawArrowButton_Click(object sender, RoutedEventArgs e)
-    {
-        _isDrawingArrow = true;
-    }
-
-    private void ImageCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (_isDrawingArrow)
+        if (e.LeftButton == MouseButtonState.Pressed)
         {
-            Point startPoint = e.GetPosition(ImageCanvas);
-            _drawArrow.StartDrawing(startPoint);
+            _viewModel.MouseMove(DrawingCanvas, e.GetPosition(DrawingCanvas));
         }
     }
 
-    private void ImageCanvas_MouseMove(object sender, MouseEventArgs e)
+    private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
     {
-        if (_isDrawingArrow && e.LeftButton == MouseButtonState.Pressed)
-        {
-            Point currentPoint = e.GetPosition(ImageCanvas);
-            _drawArrow.UpdateDrawing(currentPoint);
-        }
+        _viewModel.MouseUp();
     }
 
-    private void ImageCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        if (_isDrawingArrow)
-        {
-            Point endPoint = e.GetPosition(ImageCanvas);
-            _drawArrow.EndDrawing(endPoint);
-            _isDrawingArrow = false;
-        }
-    }
 }

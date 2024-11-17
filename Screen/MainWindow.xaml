@@ -14,16 +14,16 @@
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
             </Button>
-			<Button Width="80" Height="80" Click="Button_Click">
+			<Button Width="80" Height="80" >
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
-            <Button Width="80" Height="80" Click="AddRectangleButton_Click">
+            <Button Width="80" Height="80"  Command="{Binding DrawRectangleCommand}">
                 <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80">
+            <Button Width="80" Height="80" Command="{Binding DrawEllipseCommand}">
                 <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80" Click="DrawArrowButton_Click" >
+            <Button Width="80" Height="80" >
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
             </Button>
             <Button Width="80" Height="80">
@@ -52,7 +52,9 @@
         
         <!-- Область для изображения, которая изменяет размер вместе с окном -->
         <ScrollViewer x:Name="ImageScrollViewer" Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <Canvas x:Name="ImageCanvas">
+            <Canvas x:Name="DrawingCanvas"  MouseDown="Canvas_MouseDown" 
+                    MouseMove="Canvas_MouseMove" 
+                    MouseUp="Canvas_MouseUp">
                 <Image x:Name="PreviewImage" Stretch="None"/>
             </Canvas>
         </ScrollViewer>
