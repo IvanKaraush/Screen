@@ -2,9 +2,14 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
+using Screen.Extensions;
+using Screen.Services;
 using Application = System.Windows.Application;
+using Cursors = System.Windows.Input.Cursors;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Windows.Point;
 
 namespace Screen;
 
@@ -21,16 +26,20 @@ public partial class MainWindow
 
     private NotifyIcon _trayIcon;
     private readonly ScreenCaptureService _screenCaptureService;
+    private readonly BlurImageService _blurImageService;
+    private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
 
-    private ClipService clipService;
+    private readonly ClipService _clipService;
+
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
         InitializeComponent();
         InitializeTrayIcon();
-        clipService = new ClipService(ImageCanvas);
+        _clipService = new ClipService(ImageCanvas);
+        _blurImageService = new BlurImageService();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -101,11 +110,12 @@ public partial class MainWindow
     private void Overlay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         ShowPreviewWindow(_screenCaptureService.StopCapture());
+        
     }
 
     private void ShowPreviewWindow(Bitmap screenshot)
     {
-        PreviewImage.Source = _screenCaptureService.BitmapToImageSource(screenshot);
+        PreviewImage.Source = screenshot.ToBitmapSource();
         Show();
         _printScreenPressed = false;
     }
@@ -135,4 +145,21 @@ public partial class MainWindow
         var overlay = (Window)sender;
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
     }
+
+    private void PreviewImageBlur_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        PreviewImage.MouseDown -= PreviewImageBlur_MouseLeftButtonDown;
+        PreviewImage.MouseMove -= PreviewImageBlur_MouseLeftButtonMove;
+        PreviewImage.MouseUp -= PreviewImageBlur_MouseLeftButtonUp;
+        
+        var intensity = (int)BlurIntensitySlider.Value;
+        _blurImageService.MakeBlur((BitmapSource)PreviewImage.Source);
+
+        var blurredBitmap = _blurImageService.StopBlurRectangle(PreviewImage.Parent as Canvas, intensity);
+
+        PreviewImage.Source = null;
+        PreviewImage.Source = blurredBitmap == null ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
+                : blurredBitmap.ToBitmapSource();
+    }
+    
 }
