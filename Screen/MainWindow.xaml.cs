@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -25,20 +26,18 @@ public partial class MainWindow
     private const int HotkeyId = 9000;
 
     private NotifyIcon _trayIcon;
-    private readonly ScreenCaptureService _screenCaptureService;
     private readonly BlurImageService _blurImageService;
     private readonly ScreenCaptureService _screenCaptureService;
-    private bool _printScreenPressed;
-
     private readonly ClipService _clipService;
+    private bool _printScreenPressed;
 
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
+        _clipService = new ClipService(ImageCanvas);
         InitializeComponent();
         InitializeTrayIcon();
-        _clipService = new ClipService(ImageCanvas);
         _blurImageService = new BlurImageService();
     }
 
@@ -110,7 +109,6 @@ public partial class MainWindow
     private void Overlay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         ShowPreviewWindow(_screenCaptureService.StopCapture());
-        
     }
 
     private void ShowPreviewWindow(Bitmap screenshot)
@@ -146,20 +144,48 @@ public partial class MainWindow
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
     }
 
+    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var startPosition = new Point(50, 50);
+        _clipService.AddRectangle(startPosition);
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void MakeBlurButton(object sender, RoutedEventArgs e)
+    {
+        PreviewImage.Cursor = Cursors.Cross;
+        PreviewImage.MouseDown += PreviewImageBlur_MouseLeftButtonDown;
+        PreviewImage.MouseMove += PreviewImageBlur_MouseLeftButtonMove;
+        PreviewImage.MouseUp += PreviewImageBlur_MouseLeftButtonUp;
+    }
+
+    private void PreviewImageBlur_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _blurImageService.StartBlurRectangle(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
+    }
+
+    private void PreviewImageBlur_MouseLeftButtonMove(object sender, MouseEventArgs e)
+    {
+        _blurImageService.ProcessedBlurRectangle(e.GetPosition(PreviewImage));
+    }
+
     private void PreviewImageBlur_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         PreviewImage.MouseDown -= PreviewImageBlur_MouseLeftButtonDown;
         PreviewImage.MouseMove -= PreviewImageBlur_MouseLeftButtonMove;
         PreviewImage.MouseUp -= PreviewImageBlur_MouseLeftButtonUp;
-        
+
         var intensity = (int)BlurIntensitySlider.Value;
         _blurImageService.MakeBlur((BitmapSource)PreviewImage.Source);
 
         var blurredBitmap = _blurImageService.StopBlurRectangle(PreviewImage.Parent as Canvas, intensity);
 
         PreviewImage.Source = null;
-        PreviewImage.Source = blurredBitmap == null ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
-                : blurredBitmap.ToBitmapSource();
+        PreviewImage.Source = blurredBitmap == null
+            ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
+            : blurredBitmap.ToBitmapSource();
     }
-    
 }
