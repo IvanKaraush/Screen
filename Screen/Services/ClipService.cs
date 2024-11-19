@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
@@ -11,10 +8,10 @@ namespace Screen.Services
 {
     public class ClipService
     {
-        private Rectangle _currentRectangle;
+        private Rectangle? _currentRectangle;
         private Point _startPoint;
 
-        public void MouseDown(Canvas canvas, Point startPoint, Brush color, bool isCtrlPressed)
+        public void MouseDown(Canvas? canvas, Point startPoint, Brush color, bool isCtrlPressed)
         {
             _startPoint = startPoint;
             _currentRectangle = new Rectangle
@@ -25,10 +22,10 @@ namespace Screen.Services
             };
             Canvas.SetLeft(_currentRectangle, _startPoint.X);
             Canvas.SetTop(_currentRectangle, _startPoint.Y);
-            canvas.Children.Add(_currentRectangle);
+            canvas?.Children.Add(_currentRectangle);
         }
 
-        public void MouseMove(Canvas canvas, System.Windows.Point currentPoint)
+        public void MouseMove(Point currentPoint)
         {
             if (_currentRectangle == null) return;
 

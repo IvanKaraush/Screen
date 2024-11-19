@@ -8,10 +8,10 @@ namespace Screen.Services;
 
 public class EllipseService
 {
-    private Ellipse _currentEllipse;
+    private Ellipse? _currentEllipse;
     private Point _startPoint;
 
-    public void MouseDown(Canvas canvas, Point startPoint, Brush color, bool isCtrlPressed)
+    public void MouseDown(Canvas? canvas, Point startPoint, Brush color, bool isCtrlPressed)
     {
         _startPoint = startPoint;
         _currentEllipse = new Ellipse()
@@ -22,12 +22,11 @@ public class EllipseService
         };
         Canvas.SetLeft(_currentEllipse, _startPoint.X);
         Canvas.SetTop(_currentEllipse, _startPoint.Y);
-        canvas.Children.Add(_currentEllipse);
+        canvas?.Children.Add(_currentEllipse);
     }
 
 
-
-    public void MouseMove(Canvas canvas, System.Windows.Point currentPoint)
+    public void MouseMove(Point currentPoint)
     {
         if (_currentEllipse == null) return;
 

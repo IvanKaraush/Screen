@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Screen.Command;
@@ -10,23 +8,15 @@ using Point = System.Windows.Point;
 
 namespace Screen.Models;
 
-public class MainViewModel : INotifyPropertyChanged
+public class MainViewModel
 {
     private bool _isDrawingArrow;
     private bool _isDrawingLine;
-    private Brush _selectedBrush;
-    public Brush SelectedBrush
-    {
-        get => _selectedBrush;
-        set
-        {
-            if (_selectedBrush != value)
-            {
-                _selectedBrush = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    private bool _isDrawingRectangle;
+    private bool _isDrawingEllipse;
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    public Brush SelectedBrush { get; set; }
 
     public ICommand DrawRectangleCommand { get; }
     public ICommand DrawEllipseCommand { get; }
@@ -35,78 +25,58 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     private bool IsCtrlPressed => Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-    
-    private readonly ClipService _clipService = new ClipService();
-    private readonly EllipseService _ellipseService = new EllipseService();
-    private readonly DrawArrowService _drawArrowService = new DrawArrowService();
-    private readonly DrawLineService _drawLineService = new DrawLineService();
-    private bool _isDrawingRectangle;
-    private bool _isDrawingEllipse;
 
+    private readonly ClipService _clipService = new();
+    private readonly EllipseService _ellipseService = new();
+    private readonly DrawArrowService _drawArrowService = new();
+    private readonly DrawLineService _drawLineService = new();
 
     private bool IsDrawingRectangle
     {
         get => _isDrawingRectangle;
-        set
-        {
-            _isDrawingRectangle = value;
-            OnPropertyChanged();
-        }
+        set => _isDrawingRectangle = value;
     }
 
     private bool IsDrawingEllipse
     {
         get => _isDrawingEllipse;
-        set
-        {
-            _isDrawingEllipse = value;
-            OnPropertyChanged();
-        }
+        set => _isDrawingEllipse = value;
     }
+
     private bool IsDrawingArrow
     {
         get => _isDrawingArrow;
-        set
-        {
-            _isDrawingArrow = value;
-            OnPropertyChanged();
-        }
+        set => _isDrawingArrow = value;
     }
+
     private bool IsDrawingLine
     {
         get => _isDrawingLine;
-        set
-        {
-            _isDrawingLine = value;
-            OnPropertyChanged();
-        }
+        set => _isDrawingLine = value;
     }
+
     public MainViewModel()
     {
-        SelectedBrush = Brushes.Green; // Устанавливаем начальный цвет
+        SelectedBrush = Brushes.White;
 
-        // Команда для рисования прямоугольника
         DrawRectangleCommand = new RelayCommand(_ =>
         {
             ResetDrawingStates();
             IsDrawingRectangle = true;
         });
 
-        // Команда для рисования эллипса
         DrawEllipseCommand = new RelayCommand(_ =>
         {
             ResetDrawingStates();
             IsDrawingEllipse = true;
         });
 
-        // Команда для рисования стрелки
         DrawArrowCommand = new RelayCommand(_ =>
         {
             ResetDrawingStates();
             IsDrawingArrow = true;
         });
 
-        // Команда для рисования линии
         DrawLineCommand = new RelayCommand(_ =>
         {
             ResetDrawingStates();
@@ -124,25 +94,23 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
 
-
-    
-    public void MouseMove(Canvas canvas, Point currentPoint)
+    public void MouseMove(Point currentPoint)
     {
         if (_isDrawingRectangle)
         {
-            _clipService.MouseMove(canvas, currentPoint);
+            _clipService.MouseMove(currentPoint);
         }
-        else if (IsDrawingEllipse)
+        else if (_isDrawingEllipse)
         {
-            _ellipseService.MouseMove(canvas, currentPoint);
+            _ellipseService.MouseMove(currentPoint);
         }
         else if (_isDrawingArrow)
-        { 
-            _drawArrowService.MouseMove(canvas, currentPoint);
+        {
+            _drawArrowService.MouseMove(currentPoint);
         }
-        else if (_isDrawingLine) 
-        { 
-            _drawLineService.MouseMove(canvas, currentPoint);
+        else if (_isDrawingLine)
+        {
+            _drawLineService.MouseMove(currentPoint);
         }
     }
 
@@ -150,7 +118,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_isDrawingRectangle)
             _clipService.MouseUp();
-        else if(IsDrawingEllipse)
+        else if (_isDrawingEllipse)
             _ellipseService.MouseUp();
         else if (_isDrawingArrow)
             _drawArrowService.MouseUp();
@@ -158,7 +126,7 @@ public class MainViewModel : INotifyPropertyChanged
             _drawLineService.MouseUp();
     }
 
-    public void MouseDown(Canvas canvas, Point startPoint)
+    public void MouseDown(Canvas? canvas, Point startPoint)
     {
         if (IsDrawingRectangle)
         {
@@ -176,12 +144,5 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _drawLineService.MouseDown(canvas, startPoint, SelectedBrush);
         }
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

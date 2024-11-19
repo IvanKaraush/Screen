@@ -139,6 +139,7 @@ public partial class MainWindow
         var overlay = (Window)sender;
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
     }
+
     private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
     {
         var canvas = sender as Canvas;
@@ -152,7 +153,7 @@ public partial class MainWindow
         var currentPoint = e.GetPosition(canvas);
         if (e.LeftButton == MouseButtonState.Pressed)
         {
-            _viewModel.MouseMove(canvas, currentPoint);
+            _viewModel.MouseMove(currentPoint);
         }
     }
 
@@ -160,7 +161,4 @@ public partial class MainWindow
     {
         _viewModel.MouseUp();
     }
-
-
-
 }

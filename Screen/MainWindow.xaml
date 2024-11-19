@@ -39,6 +39,10 @@
                     <SolidColorBrush Color="Blue"/>
                     <SolidColorBrush Color="Yellow"/>
                     <SolidColorBrush Color="Black"/>
+                    <SolidColorBrush Color="White"/>
+                    <SolidColorBrush Color="DarkSlateGray"/>
+                    <SolidColorBrush Color="HotPink"/>
+                    <SolidColorBrush Color="Brown"/>
                 </ComboBox.Items>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

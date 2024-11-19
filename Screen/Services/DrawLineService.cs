@@ -1,5 +1,3 @@
-using System.Windows;
-using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Controls;
 using Brush = System.Windows.Media.Brush;
@@ -9,12 +7,10 @@ namespace Screen.Services
 {
     public class DrawLineService
     {
-        private Line _currentLine;
-        private Point _startPoint;
+        private Line? _currentLine;
 
-        public void MouseDown(Canvas canvas, Point startPoint, Brush color)
+        public void MouseDown(Canvas? canvas, Point startPoint, Brush color)
         {
-            _startPoint = startPoint;
             _currentLine = new Line
             {
                 Stroke = color,
@@ -25,10 +21,10 @@ namespace Screen.Services
                 Y2 = startPoint.Y
             };
 
-            canvas.Children.Add(_currentLine);
+            canvas?.Children.Add(_currentLine);
         }
 
-        public void MouseMove(Canvas canvas, Point currentPoint)
+        public void MouseMove(Point currentPoint)
         {
             if (_currentLine == null) return;
 
