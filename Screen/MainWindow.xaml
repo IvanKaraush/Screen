@@ -3,13 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Screen" Height="450" Width="800">
     <Grid>
-        <!-- Динамическое изменение высоты строк -->
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- высота ToolBar автоматически подстраивается под его содержимое -->
-            <RowDefinition Height="*"/> <!-- оставшееся пространство для Border с изображением -->
+            <RowDefinition Height="Auto"/> 
+            <RowDefinition Height="*"/> 
         </Grid.RowDefinitions>
         
-        <!-- Панель инструментов -->
         <ToolBar Grid.Row="0">
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>

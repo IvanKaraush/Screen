@@ -1,6 +1,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using Screen.Command;
+using Screen.Exceptions;
 using Screen.Primitives;
 using Screen.Services;
 using Brush = System.Windows.Media.Brush;
@@ -42,7 +43,9 @@ public class MainViewModel
 
     private void SelectService(ServiceNames key)
     {
-        _currentDrawService = _drawServices.TryGetValue(key, out var service) ? service : null;
+        _currentDrawService = _drawServices.TryGetValue(key, out var service)
+            ? service
+            : throw new ServiceNotFoundException($"Сервиса с ключом {key} не существует");
     }
 
     public void MouseDown(Canvas? canvas, Point startPoint)
