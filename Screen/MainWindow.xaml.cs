@@ -4,9 +4,14 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Screen.Models;
+using System.Windows.Media.Imaging;
+using Screen.Extensions;
+using Screen.Services;
 using Application = System.Windows.Application;
+using Cursors = System.Windows.Input.Cursors;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Windows.Point;
 
 namespace Screen;
 
@@ -22,7 +27,9 @@ public partial class MainWindow
     private const int HotkeyId = 9000;
 
     private NotifyIcon _trayIcon;
+    private readonly BlurImageService _blurImageService;
     private readonly ScreenCaptureService _screenCaptureService;
+    private readonly ClipService _clipService;
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
 
@@ -31,10 +38,12 @@ public partial class MainWindow
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
+        _clipService = new ClipService(ImageCanvas);
         InitializeComponent();
         InitializeTrayIcon();
         _viewModel = new MainViewModel();
         DataContext = _viewModel;
+        _blurImageService = new BlurImageService();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -109,7 +118,7 @@ public partial class MainWindow
 
     private void ShowPreviewWindow(Bitmap screenshot)
     {
-        PreviewImage.Source = _screenCaptureService.BitmapToImageSource(screenshot);
+        PreviewImage.Source = screenshot.ToBitmapSource();
         Show();
         _printScreenPressed = false;
     }
@@ -160,5 +169,48 @@ public partial class MainWindow
     private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
     {
         _viewModel.MouseUp();
+    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var startPosition = new Point(50, 50);
+        _clipService.AddRectangle(startPosition);
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+    }
+
+    private void MakeBlurButton(object sender, RoutedEventArgs e)
+    {
+        PreviewImage.Cursor = Cursors.Cross;
+        PreviewImage.MouseDown += PreviewImageBlur_MouseLeftButtonDown;
+        PreviewImage.MouseMove += PreviewImageBlur_MouseLeftButtonMove;
+        PreviewImage.MouseUp += PreviewImageBlur_MouseLeftButtonUp;
+    }
+
+    private void PreviewImageBlur_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _blurImageService.StartBlurRectangle(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
+    }
+
+    private void PreviewImageBlur_MouseLeftButtonMove(object sender, MouseEventArgs e)
+    {
+        _blurImageService.ProcessedBlurRectangle(e.GetPosition(PreviewImage));
+    }
+
+    private void PreviewImageBlur_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        PreviewImage.MouseDown -= PreviewImageBlur_MouseLeftButtonDown;
+        PreviewImage.MouseMove -= PreviewImageBlur_MouseLeftButtonMove;
+        PreviewImage.MouseUp -= PreviewImageBlur_MouseLeftButtonUp;
+
+        var intensity = (int)BlurIntensitySlider.Value;
+        _blurImageService.MakeBlur((BitmapSource)PreviewImage.Source);
+
+        var blurredBitmap = _blurImageService.StopBlurRectangle(PreviewImage.Parent as Canvas, intensity);
+
+        PreviewImage.Source = null;
+        PreviewImage.Source = blurredBitmap == null
+            ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
+            : blurredBitmap.ToBitmapSource();
     }
 }
