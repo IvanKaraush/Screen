@@ -17,16 +17,16 @@
 			<Button Width="80" Height="80" >
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
-            <Button Width="80" Height="80"  Command="{Binding DrawRectangleCommand}">
+            <Button Width="80" Height="80"  Command="{Binding SelectRectangleCommand}">
                 <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80" Command="{Binding DrawEllipseCommand}">
+            <Button Width="80" Height="80" Command="{Binding SelectEllipseCommand}">
                 <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80" Command="{Binding DrawArrowCommand}">
+            <Button Width="80" Height="80" Command="{Binding SelectArrowCommand}">
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
             </Button>
-            <Button Width="80" Height="80" Command="{Binding DrawLineCommand}">
+            <Button Width="80" Height="80" Command="{Binding SelectLineCommand}">
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">—</TextBlock>
             </Button>
             <Button Width="80" Height="80">

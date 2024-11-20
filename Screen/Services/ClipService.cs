@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using System.Windows.Input;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
@@ -10,15 +11,16 @@ namespace Screen.Services
     {
         private Rectangle? _currentRectangle;
         private Point _startPoint;
+        private bool IsCtrlPressed => Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
-        public void MouseDown(Canvas? canvas, Point startPoint, Brush color, bool isCtrlPressed)
+        public void MouseDown(Canvas? canvas, Point startPoint, Brush color)
         {
             _startPoint = startPoint;
             _currentRectangle = new Rectangle
             {
                 Stroke = color,
                 StrokeThickness = 2,
-                Fill = isCtrlPressed ? color : Brushes.Transparent
+                Fill = IsCtrlPressed ? color : Brushes.Transparent
             };
             Canvas.SetLeft(_currentRectangle, _startPoint.X);
             Canvas.SetTop(_currentRectangle, _startPoint.Y);
@@ -39,7 +41,6 @@ namespace Screen.Services
             _currentRectangle.Width = width;
             _currentRectangle.Height = height;
         }
-
 
         public void MouseUp()
         {

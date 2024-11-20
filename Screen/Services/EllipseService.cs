@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Shapes;
 using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
@@ -10,25 +11,28 @@ public class EllipseService
 {
     private Ellipse? _currentEllipse;
     private Point _startPoint;
+    private bool IsCtrlPressed => Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
-    public void MouseDown(Canvas? canvas, Point startPoint, Brush color, bool isCtrlPressed)
+    public void MouseDown(Canvas? canvas, Point startPoint, Brush color)
     {
         _startPoint = startPoint;
         _currentEllipse = new Ellipse()
         {
             Stroke = color,
             StrokeThickness = 2,
-            Fill = isCtrlPressed ? color : Brushes.Transparent
+            Fill = IsCtrlPressed ? color : Brushes.Transparent
         };
         Canvas.SetLeft(_currentEllipse, _startPoint.X);
         Canvas.SetTop(_currentEllipse, _startPoint.Y);
         canvas?.Children.Add(_currentEllipse);
     }
 
-
     public void MouseMove(Point currentPoint)
     {
-        if (_currentEllipse == null) return;
+        if (_currentEllipse == null)
+        {
+            return;
+        }
 
         var x = Math.Min(_startPoint.X, currentPoint.X);
         var y = Math.Min(_startPoint.Y, currentPoint.Y);
@@ -40,7 +44,6 @@ public class EllipseService
         _currentEllipse.Width = width;
         _currentEllipse.Height = height;
     }
-
 
     public void MouseUp()
     {
