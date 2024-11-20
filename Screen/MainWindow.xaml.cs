@@ -29,7 +29,6 @@ public partial class MainWindow
     private NotifyIcon _trayIcon;
     private readonly BlurImageService _blurImageService;
     private readonly ScreenCaptureService _screenCaptureService;
-    private readonly ClipService _clipService;
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
 
@@ -38,7 +37,6 @@ public partial class MainWindow
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
-        _clipService = new ClipService(ImageCanvas);
         InitializeComponent();
         InitializeTrayIcon();
         _viewModel = new MainViewModel();
@@ -169,14 +167,6 @@ public partial class MainWindow
     private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
     {
         _viewModel.MouseUp();
-    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
-    {
-        var startPosition = new Point(50, 50);
-        _clipService.AddRectangle(startPosition);
-    }
-
-    private void Button_Click(object sender, RoutedEventArgs e)
-    {
     }
 
     private void MakeBlurButton(object sender, RoutedEventArgs e)
