@@ -14,21 +14,42 @@
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
             </Button>
-			<Button Width="80" Height="80" Click="Button_Click">
-				<TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
+			<Button Width="80" Height="80" >
+                <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
-            <Button Width="80" Height="80" Click="AddRectangleButton_Click">
+            <Button Width="80" Height="80"  Command="{Binding SelectRectangleCommand}">
                 <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80">
+            <Button Width="80" Height="80" Command="{Binding SelectEllipseCommand}">
                 <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
             </Button>
-            <Button Width="80" Height="80">
+            <Button Width="80" Height="80" Command="{Binding SelectArrowCommand}">
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
+            </Button>
+            <Button Width="80" Height="80" Command="{Binding SelectLineCommand}">
+                <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">—</TextBlock>
             </Button>
             <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">T</TextBlock>
             </Button>
+            <ComboBox Width="50" Height="30" SelectedItem="{Binding SelectedBrush, Mode=TwoWay}">
+                <ComboBox.Items>
+                    <SolidColorBrush Color="Red"/>
+                    <SolidColorBrush Color="Green"/>
+                    <SolidColorBrush Color="Blue"/>
+                    <SolidColorBrush Color="Yellow"/>
+                    <SolidColorBrush Color="Black"/>
+                    <SolidColorBrush Color="White"/>
+                    <SolidColorBrush Color="DarkSlateGray"/>
+                    <SolidColorBrush Color="HotPink"/>
+                    <SolidColorBrush Color="Brown"/>
+                </ComboBox.Items>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Rectangle Width="20" Height="20" Fill="{Binding}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <Button Width="80" Height="80" Content="Blur test" Click="MakeBlurButton">
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
@@ -37,15 +58,17 @@
                         TickFrequency="10" IsSnapToTickEnabled="True" />
                 <TextBlock Text="{Binding ElementName=BlurIntensitySlider, Path=Value, StringFormat=Blur: {0}%}" />
             </StackPanel>
-
         </ToolBar>
         
-        <!-- Область для изображения, которая изменяет размер вместе с окном -->
-		<ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-			<Canvas x:Name="ImageCanvas">
-			    <Image x:Name="PreviewImage" Stretch="None" />
-			</Canvas>
-		</ScrollViewer>
+        <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Canvas x:Name="DrawingCanvas" MouseDown="Canvas_MouseDown" 
+                    MouseMove="Canvas_MouseMove" 
+                    MouseUp="Canvas_MouseUp">
+                <Image x:Name="PreviewImage" Stretch="None"/>
+            </Canvas>
+        </ScrollViewer>
 
-	</Grid>
+
+
+    </Grid>
 </Window>

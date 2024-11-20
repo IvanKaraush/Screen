@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Screen.Models;
 using System.Windows.Media.Imaging;
 using Screen.Extensions;
 using Screen.Services;
@@ -28,16 +29,18 @@ public partial class MainWindow
     private NotifyIcon _trayIcon;
     private readonly BlurImageService _blurImageService;
     private readonly ScreenCaptureService _screenCaptureService;
-    private readonly ClipService _clipService;
     private bool _printScreenPressed;
+    private readonly MainViewModel _viewModel;
+
 
     public MainWindow()
     {
         _trayIcon = new NotifyIcon();
         _screenCaptureService = new ScreenCaptureService();
-        _clipService = new ClipService(ImageCanvas);
         InitializeComponent();
         InitializeTrayIcon();
+        _viewModel = new MainViewModel();
+        DataContext = _viewModel;
         _blurImageService = new BlurImageService();
     }
 
@@ -76,7 +79,7 @@ public partial class MainWindow
 
     private void ComponentDispatcher_ThreadPreprocessMessage(ref MSG msg, ref bool handled)
     {
-        if (msg.message == WmHotkey && (int)msg.wParam == HotkeyId && _printScreenPressed == false)
+        if (msg.message == WmHotkey && (int)msg.wParam == HotkeyId && !_printScreenPressed)
         {
             _printScreenPressed = true;
             foreach (var screen in _screenCaptureService.Screens)
@@ -144,14 +147,26 @@ public partial class MainWindow
         _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
     }
 
-    private void AddRectangleButton_Click(object sender, RoutedEventArgs e)
+    private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        var startPosition = new Point(50, 50);
-        _clipService.AddRectangle(startPosition);
+        var canvas = sender as Canvas;
+        var startPoint = e.GetPosition(canvas);
+        _viewModel.MouseDown(canvas, startPoint);
     }
 
-    private void Button_Click(object sender, RoutedEventArgs e)
+    private void Canvas_MouseMove(object sender, MouseEventArgs e)
     {
+        var canvas = sender as Canvas;
+        var currentPoint = e.GetPosition(canvas);
+        if (e.LeftButton == MouseButtonState.Pressed)
+        {
+            _viewModel.MouseMove(currentPoint);
+        }
+    }
+
+    private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        _viewModel.MouseUp();
     }
 
     private void MakeBlurButton(object sender, RoutedEventArgs e)
