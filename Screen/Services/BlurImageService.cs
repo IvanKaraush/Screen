@@ -2,8 +2,10 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Image = System.Drawing.Image;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
 
 namespace Screen.Services;
@@ -12,7 +14,6 @@ public class BlurImageService
 {
     private System.Windows.Shapes.Rectangle? _selectionRectangle;
     private Point _startPoint;
-    private bool _isDragging;
     private Bitmap? _originalBitmap;
 
     public Bitmap MakeBlur(BitmapSource previewImage)
@@ -21,56 +22,43 @@ public class BlurImageService
         return _originalBitmap;
     }
 
-    public void StartBlurRectangle(Point startPoint, Canvas? canvas)
+    public void MouseLeftButtonDown(Point startPoint, Canvas? canvas)
     {
-        _isDragging = true;
         _startPoint = startPoint;
-
-        // Создаем прямоугольник для выделения
         _selectionRectangle = new System.Windows.Shapes.Rectangle
         {
-            Stroke = System.Windows.Media.Brushes.Red,
             StrokeThickness = 2,
-            Fill = System.Windows.Media.Brushes.Transparent
+            Stroke = new SolidColorBrush(Colors.White)
         };
-
-        if (!_selectionRectangle.IsLoaded)
-        {
-            canvas?.Children.Add(_selectionRectangle);
-            Canvas.SetLeft(_selectionRectangle, _startPoint.X);
-            Canvas.SetTop(_selectionRectangle, _startPoint.Y);     
-        }
-       
+        Canvas.SetLeft(_selectionRectangle, _startPoint.X);
+        Canvas.SetTop(_selectionRectangle, _startPoint.Y);
+        canvas?.Children.Add(_selectionRectangle);
     }
 
-    public void ProcessedBlurRectangle(Point currentPoint)
+    public void MouseLeftButtonMove(Point currentPoint)
     {
-        if (!_isDragging || _selectionRectangle == null)
+        if (_selectionRectangle == null)
+        {
             return;
+        }
 
-        // Рассчитываем размеры прямоугольника
         var x = Math.Min(_startPoint.X, currentPoint.X);
         var y = Math.Min(_startPoint.Y, currentPoint.Y);
         var width = Math.Abs(_startPoint.X - currentPoint.X);
         var height = Math.Abs(_startPoint.Y - currentPoint.Y);
 
-        if (_selectionRectangle.IsLoaded)
-        {
-            // Обновляем размеры прямоугольника
-            Canvas.SetLeft(_selectionRectangle, x);
-            Canvas.SetTop(_selectionRectangle, y);
-            _selectionRectangle.Width = width;
-            _selectionRectangle.Height = height;     
-        }
-       
+        Canvas.SetLeft(_selectionRectangle, x);
+        Canvas.SetTop(_selectionRectangle, y);
+        _selectionRectangle.Width = width;
+        _selectionRectangle.Height = height;
     }
 
-    public Bitmap? StopBlurRectangle(Canvas? canvas, int blurIntensity)
+    public Bitmap? MouseLeftButtonUp(Canvas? canvas, int blurIntensity)
     {
-        _isDragging = false;
-
         if (_selectionRectangle == null)
+        {
             return default;
+        }
 
         canvas?.Children.Remove(_selectionRectangle);
 
@@ -81,9 +69,9 @@ public class BlurImageService
         var height = (int)_selectionRectangle.Height;
 
         // Применяем размытие
+        _selectionRectangle = null;
         return ApplyBlurToSelection(x, y, width, height, blurIntensity);
     }
-
 
     private Bitmap ApplyBlurToSelection(int x, int y, int width, int height, int blurIntensity)
     {
@@ -112,17 +100,16 @@ public class BlurImageService
         return blurredBitmap;
     }
 
-
-// Генерация ядра Гаусса
+    // Генерация ядра Гаусса
     private static double[,] CreateGaussianKernel(int size, int radius)
     {
         var kernel = new double[size, size];
         var sigma = radius / 2.0;
         var sigma2 = 2 * sigma * sigma;
         var sqrtSigmaPi2 = Math.Sqrt(Math.PI * sigma2);
-        double radius2 = radius * radius;
+        var radius2 = radius * radius;
 
-        double total = 0;
+        var total = 0.0;
         for (var x = -radius; x <= radius; x++)
         {
             for (var y = -radius; y <= radius; y++)
@@ -147,8 +134,9 @@ public class BlurImageService
         return kernel;
     }
 
-// Применение Гауссова размытия
-    private static void ApplyGaussianBlur(byte[] sourceBuffer, byte[] resultBuffer, int width, int height, int stride, int bytesPerPixel, double[,] kernel,
+    // Применение Гауссова размытия
+    private static void ApplyGaussianBlur(byte[] sourceBuffer, byte[] resultBuffer, int width, int height, int stride, int bytesPerPixel,
+        double[,] kernel,
         int kernelSize)
     {
         var radius = kernelSize / 2;

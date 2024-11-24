@@ -17,7 +17,7 @@ namespace Screen.Services;
 
 public class ScreenCaptureService
 {
-    public System.Windows.Forms.Screen[] Screens { get; } = System.Windows.Forms.Screen.AllScreens;
+    public IEnumerable<System.Windows.Forms.Screen> Screens { get; } = System.Windows.Forms.Screen.AllScreens;
     private bool _isSelecting;
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
@@ -71,7 +71,7 @@ public class ScreenCaptureService
         return overlayBlackOut;
     }
 
-    public void StartCapture(Window overlay, Point startPosition)
+    public void MouseLeftButtonDown(Window overlay, Point startPosition)
     {
         if (_isSelecting)
         {
@@ -97,7 +97,7 @@ public class ScreenCaptureService
         _selectionRectangle.Height = 0;
     }
 
-    public Bitmap StopCapture()
+    public Bitmap MouseLeftButtonUp()
     {
         _isSelecting = false;
         foreach (var overlay in Overlays.Where(c => c.Name == "Black").ToList())
@@ -115,45 +115,47 @@ public class ScreenCaptureService
         }
 
         Overlays.Clear();
+        _selectionRectangle = null;
         return screenshot;
     }
 
-    public void ChangeScreenFigure(Window overlay, Point startPosition)
+    public void MouseMove(Window overlay, Point startPosition)
     {
-        if (!_isSelecting)
-        {
-            return;
-        }
-
-        var endPoint = startPosition;
-
-        var x = Math.Min(_startPoint.X, endPoint.X);
-        var y = Math.Min(_startPoint.Y, endPoint.Y);
-        var width = Math.Abs(_startPoint.X - endPoint.X);
-        var height = Math.Abs(_startPoint.Y - endPoint.Y);
         if (_selectionRectangle == null)
         {
             return;
         }
+
+        var x = Math.Min(_startPoint.X, startPosition.X);
+        var y = Math.Min(_startPoint.Y, startPosition.Y);
+        var width = Math.Abs(_startPoint.X - startPosition.X);
+        var height = Math.Abs(_startPoint.Y - startPosition.Y);
 
         Canvas.SetLeft(_selectionRectangle, x);
         Canvas.SetTop(_selectionRectangle, y);
         _selectionRectangle.Width = width;
         _selectionRectangle.Height = height;
 
-        if (_selectionRectangle.IsLoaded)
+        var overlayBrush = new DrawingBrush
         {
-            return;
-        }
+            Drawing = new GeometryDrawing
+            {
+                Geometry = new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height)),
+                Brush = Brushes.Black
+            }
+        };
 
-        var overlayRect = new Rect(0, 0, overlay.Width, overlay.Height);
-        var selectionRect = new Rect(x, y, width, height);
+        overlayBrush.Drawing = new GeometryDrawing
+        {
+            Geometry = new CombinedGeometry(
+                GeometryCombineMode.Exclude,
+                new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height)),
+                new RectangleGeometry(new Rect(x, y, width, height))
+            ),
+            Brush = Brushes.Black
+        };
 
-        var clipGeometry = new RectangleGeometry(overlayRect);
-        var selectionGeometry = new RectangleGeometry(selectionRect);
-        var combinedGeometry =
-            new CombinedGeometry(GeometryCombineMode.Exclude, clipGeometry, selectionGeometry);
-        overlay.Clip = combinedGeometry;
+        overlay.OpacityMask = overlayBrush;
     }
 
     private Bitmap CaptureScreenshot()
