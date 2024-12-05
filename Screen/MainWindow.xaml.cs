@@ -3,15 +3,20 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using Screen.Models;
 using System.Windows.Media.Imaging;
 using Screen.Extensions;
 using Screen.Services;
 using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using ComboBox = System.Windows.Controls.ComboBox;
 using Cursors = System.Windows.Input.Cursors;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using Point = System.Windows.Point;
+using Rectangle = System.Windows.Shapes.Rectangle;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Screen;
 
@@ -31,7 +36,7 @@ public partial class MainWindow
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
-
+    private readonly DragService _dragService = new();
 
     public MainWindow()
     {
@@ -202,5 +207,76 @@ public partial class MainWindow
         PreviewImage.Source = blurredBitmap == null
             ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
             : blurredBitmap.ToBitmapSource();
+    }
+
+    private void ComboBox_DropDownOpened(object sender, EventArgs e)
+    {
+        var colorDialog = new ColorDialog();
+        if (colorDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+
+        var selectedColor = colorDialog.Color;
+
+        _viewModel.SelectedBrush =
+            new SolidColorBrush(Color.FromArgb(selectedColor.A, selectedColor.R, selectedColor.G, selectedColor.B));
+
+        if (sender is ComboBox comboBox)
+        {
+            comboBox.Items.Clear();
+            var rectangle = new Rectangle
+            {
+                Width = 20,
+                Height = 20,
+                Fill = _viewModel.SelectedBrush
+            };
+
+            comboBox.Items.Add(rectangle);
+            comboBox.SelectedIndex = 0;
+        }
+    }
+    
+    private void AddTextBox_Click(object sender, RoutedEventArgs e)
+    {
+        var newTextBox = new TextBox
+        {
+            Width = 200,
+            Height = 30,
+            Text = "Введите текст...",
+            FontSize = 14,
+            Foreground = _viewModel.SelectedBrush,
+            Background = Brushes.Transparent, 
+            BorderThickness = new Thickness(0), 
+        };
+
+        Canvas.SetLeft(newTextBox, 50);
+        Canvas.SetTop(newTextBox, 50);
+
+        newTextBox.GotFocus += TextBox_GotFocus;
+        newTextBox.LostFocus += TextBox_LostFocus;
+
+        DrawingCanvas.Children.Add(newTextBox);
+    }
+    
+    private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox { Text: "Введите текст..." } textBox) return;
+        textBox.Text = "";
+    }
+
+    private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox textBox || !string.IsNullOrWhiteSpace(textBox.Text)) return;
+        textBox.Text = "Введите текст...";
+        textBox.Foreground = Brushes.Gray;
+    }
+
+    private void EnableDragButton_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var child in DrawingCanvas.Children)
+        {
+            if (child is UIElement element)
+            {
+                _dragService.EnableDragging(element);
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Screen.Primitives;
 
-public enum ServiceNames
+public enum ServiceNamesEnum
 {
     None = 0,
     Rectangle = 1,
