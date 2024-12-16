@@ -97,7 +97,13 @@ public class BlurImageService
         Marshal.Copy(resultBuffer, 0, ptr, resultBuffer.Length);
         blurredBitmap.UnlockBits(bitmapData);
 
-        return blurredBitmap;
+        // Теперь наложим заблюренную область обратно на оригинальное изображение
+        using (Graphics g = Graphics.FromImage(_originalBitmap))
+        {
+            g.DrawImage(blurredBitmap, rect, rect, GraphicsUnit.Pixel);
+        }
+
+        return _originalBitmap;
     }
 
     // Генерация ядра Гаусса
@@ -140,9 +146,9 @@ public class BlurImageService
         int kernelSize)
     {
         var radius = kernelSize / 2;
-        for (var y = radius; y < height - radius; y++)
+        for (var y = 0; y < height; y++)
         {
-            for (var x = radius; x < width - radius; x++)
+            for (var x = 0; x < width; x++)
             {
                 var blurredPixel = new double[3]; // RGB
 
@@ -150,8 +156,9 @@ public class BlurImageService
                 {
                     for (var kx = -radius; kx <= radius; kx++)
                     {
-                        var pixelX = x + kx;
-                        var pixelY = y + ky;
+                        var pixelX = Math.Clamp(x + kx, 0, width - 1);
+                        var pixelY = Math.Clamp(y + ky, 0, height - 1);
+
                         var offset = (pixelY * stride) + (pixelX * bytesPerPixel);
 
                         var weight = kernel[ky + radius, kx + radius];

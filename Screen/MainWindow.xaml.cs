@@ -188,6 +188,7 @@ public partial class MainWindow
 
     private void PreviewImageBlur_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        PreviewImage.Cursor = Cursors.Arrow;
         PreviewImage.MouseDown -= PreviewImageBlur_MouseLeftButtonDown;
         PreviewImage.MouseMove -= PreviewImageBlur_MouseLeftButtonMove;
         PreviewImage.MouseUp -= PreviewImageBlur_MouseLeftButtonUp;
