@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Brushes = System.Windows.Media.Brushes;
@@ -21,7 +22,9 @@ public class ScreenCaptureService
     private bool _isSelecting;
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
-    public List<Window> Overlays { get; } =  [];
+    private TextBlock? _sizeTextBlock;
+    private Popup? _textPopup;
+    public List<Window> Overlays { get; } = [];
 
     public Window StartScreenCapture(System.Windows.Forms.Screen screen)
     {
@@ -87,9 +90,26 @@ public class ScreenCaptureService
             StrokeThickness = 2
         };
 
+        _sizeTextBlock = new TextBlock
+        {
+            Foreground = Brushes.Black,
+            Background = Brushes.White,
+            Margin = new Thickness(5),
+            FontSize = 14,
+            TextAlignment = TextAlignment.Center
+        };
+
+        _textPopup = new Popup
+        {
+            Child = _sizeTextBlock,
+            StaysOpen = true,
+            AllowsTransparency = true
+        };
+
         var canvas = new Canvas();
         canvas.Children.Add(_selectionRectangle);
         overlay.Content = canvas;
+        overlay.Tag = _sizeTextBlock;
 
         Canvas.SetLeft(_selectionRectangle, _startPoint.X);
         Canvas.SetTop(_selectionRectangle, _startPoint.Y);
@@ -104,6 +124,12 @@ public class ScreenCaptureService
         {
             overlay.Hide();
             overlay.Close();
+        }
+
+        // Закрыть и скрыть текстовое окно
+        if (_textPopup != null)
+        {
+            _textPopup.IsOpen = false;
         }
 
         var screenshot = CaptureScreenshot();
@@ -136,6 +162,8 @@ public class ScreenCaptureService
         _selectionRectangle.Width = width;
         _selectionRectangle.Height = height;
 
+        UpdateTextPopup(x, y, width, height);
+
         var overlayBrush = new DrawingBrush
         {
             Drawing = new GeometryDrawing
@@ -156,6 +184,20 @@ public class ScreenCaptureService
         };
 
         overlay.OpacityMask = overlayBrush;
+    }
+
+    private void UpdateTextPopup(double x, double y, double width, double height)
+    {
+        if (_sizeTextBlock == null || _textPopup == null)
+            return;
+
+        _sizeTextBlock.Text = $"{(int)width + 1}x{(int)height + 1}";
+        double textWidth = _sizeTextBlock.ActualWidth;
+        double textHeight = _sizeTextBlock.ActualHeight;
+
+        _textPopup.HorizontalOffset = x + (width - textWidth) / 2;
+        _textPopup.VerticalOffset = y + (height - textHeight) / 2;
+        _textPopup.IsOpen = true;
     }
 
     private Bitmap CaptureScreenshot()
