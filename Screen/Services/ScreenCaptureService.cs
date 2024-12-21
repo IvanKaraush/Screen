@@ -188,15 +188,19 @@ public class ScreenCaptureService
 
     private void UpdateTextPopup(double x, double y, double width, double height)
     {
-        if (_sizeTextBlock == null || _textPopup == null)
+        if (_sizeTextBlock == null || _textPopup == null || _selectionRectangle == null)
+        {
             return;
+        }
 
         _sizeTextBlock.Text = $"{(int)width + 1}x{(int)height + 1}";
-        double textWidth = _sizeTextBlock.ActualWidth;
-        double textHeight = _sizeTextBlock.ActualHeight;
 
-        _textPopup.HorizontalOffset = x + (width - textWidth) / 2;
-        _textPopup.VerticalOffset = y + (height - textHeight) / 2;
+        var rectPosition = _selectionRectangle.TransformToAncestor(_selectionRectangle.Parent as Visual)
+            .Transform(new Point(0, 0));
+
+        _textPopup.HorizontalOffset = rectPosition.X + (width - _sizeTextBlock.ActualWidth) / 2;
+        _textPopup.VerticalOffset = rectPosition.Y + (height - _sizeTextBlock.ActualHeight) / 2;
+
         _textPopup.IsOpen = true;
     }
 
