@@ -162,7 +162,7 @@ public class ScreenCaptureService
         _selectionRectangle.Width = width;
         _selectionRectangle.Height = height;
 
-        UpdateTextPopup(x, y, width, height);
+        UpdateTextPopup(width, height);
 
         var overlayBrush = new DrawingBrush
         {
@@ -186,7 +186,7 @@ public class ScreenCaptureService
         overlay.OpacityMask = overlayBrush;
     }
 
-    private void UpdateTextPopup(double x, double y, double width, double height)
+    private void UpdateTextPopup(double width, double height)
     {
         if (_sizeTextBlock == null || _textPopup == null || _selectionRectangle == null)
         {
@@ -195,13 +195,17 @@ public class ScreenCaptureService
 
         _sizeTextBlock.Text = $"{(int)width + 1}x{(int)height + 1}";
 
-        var rectPosition = _selectionRectangle.TransformToAncestor(_selectionRectangle.Parent as Visual)
-            .Transform(new Point(0, 0));
+        if (_selectionRectangle.Parent is Visual parentVisual)
+        {
+            var rectPosition = _selectionRectangle
+                .TransformToAncestor(parentVisual)
+                .Transform(new Point(0, 0));
+            
+            _textPopup.HorizontalOffset = rectPosition.X + (width - _sizeTextBlock.ActualWidth) / 2;
+            _textPopup.VerticalOffset = rectPosition.Y + (height - _sizeTextBlock.ActualHeight) / 2;
 
-        _textPopup.HorizontalOffset = rectPosition.X + (width - _sizeTextBlock.ActualWidth) / 2;
-        _textPopup.VerticalOffset = rectPosition.Y + (height - _sizeTextBlock.ActualHeight) / 2;
-
-        _textPopup.IsOpen = true;
+            _textPopup.IsOpen = true;
+        }
     }
 
     private Bitmap CaptureScreenshot()
