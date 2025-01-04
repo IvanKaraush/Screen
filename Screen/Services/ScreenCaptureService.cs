@@ -83,6 +83,7 @@ public class ScreenCaptureService
 
         _isSelecting = true;
         _startPoint = startPosition;
+
         _selectionRectangle = new Rectangle
         {
             Fill = Brushes.Transparent,
@@ -92,29 +93,22 @@ public class ScreenCaptureService
 
         _sizeTextBlock = new TextBlock
         {
-            Foreground = Brushes.Black,
-            Background = Brushes.White,
-            Margin = new Thickness(5),
-            FontSize = 14,
-            TextAlignment = TextAlignment.Center
+            Foreground = Brushes.White,
+            Background = Brushes.Black,
+            FontSize = 14
         };
 
-        _textPopup = new Popup
-        {
-            Child = _sizeTextBlock,
-            StaysOpen = true,
-            AllowsTransparency = true
-        };
+        _selectionRectangle.SizeChanged += (_, _) => { UpdateSizeTextBlockPosition(); };
+        _sizeTextBlock.SizeChanged += (_, _) => { UpdateSizeTextBlockPosition(); };
 
         var canvas = new Canvas();
         canvas.Children.Add(_selectionRectangle);
-        overlay.Content = canvas;
-        overlay.Tag = _sizeTextBlock;
+        canvas.Children.Add(_sizeTextBlock);
 
-        Canvas.SetLeft(_selectionRectangle, _startPoint.X);
-        Canvas.SetTop(_selectionRectangle, _startPoint.Y);
-        _selectionRectangle.Width = 0;
-        _selectionRectangle.Height = 0;
+        overlay.Content = canvas;
+
+        Canvas.SetLeft(_sizeTextBlock, _selectionRectangle.Width - _sizeTextBlock.ActualWidth);
+        Canvas.SetTop(_sizeTextBlock, _selectionRectangle.Height - _sizeTextBlock.ActualHeight);
     }
 
     public Bitmap MouseLeftButtonUp()
@@ -145,17 +139,17 @@ public class ScreenCaptureService
         return screenshot;
     }
 
-    public void MouseMove(Window overlay, Point startPosition)
+    public void MouseMove(Point currentPosition)
     {
-        if (_selectionRectangle == null)
+        if (_selectionRectangle == null || _sizeTextBlock == null)
         {
             return;
         }
 
-        var x = Math.Min(_startPoint.X, startPosition.X);
-        var y = Math.Min(_startPoint.Y, startPosition.Y);
-        var width = Math.Abs(_startPoint.X - startPosition.X);
-        var height = Math.Abs(_startPoint.Y - startPosition.Y);
+        var x = Math.Min(_startPoint.X, currentPosition.X);
+        var y = Math.Min(_startPoint.Y, currentPosition.Y);
+        var width = Math.Abs(_startPoint.X - currentPosition.X);
+        var height = Math.Abs(_startPoint.Y - currentPosition.Y);
 
         Canvas.SetLeft(_selectionRectangle, x);
         Canvas.SetTop(_selectionRectangle, y);
@@ -163,27 +157,7 @@ public class ScreenCaptureService
         _selectionRectangle.Height = height;
 
         UpdateTextPopup(width, height);
-
-        var overlayBrush = new DrawingBrush
-        {
-            Drawing = new GeometryDrawing
-            {
-                Geometry = new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height)),
-                Brush = Brushes.Black
-            }
-        };
-
-        overlayBrush.Drawing = new GeometryDrawing
-        {
-            Geometry = new CombinedGeometry(
-                GeometryCombineMode.Exclude,
-                new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height)),
-                new RectangleGeometry(new Rect(x, y, width, height))
-            ),
-            Brush = Brushes.Black
-        };
-
-        overlay.OpacityMask = overlayBrush;
+        _sizeTextBlock.Text = $"{(int)width}x{(int)height}";
     }
 
     private void UpdateTextPopup(double width, double height)
@@ -200,7 +174,7 @@ public class ScreenCaptureService
             var rectPosition = _selectionRectangle
                 .TransformToAncestor(parentVisual)
                 .Transform(new Point(0, 0));
-            
+
             _textPopup.HorizontalOffset = rectPosition.X + (width - _sizeTextBlock.ActualWidth) / 2;
             _textPopup.VerticalOffset = rectPosition.Y + (height - _sizeTextBlock.ActualHeight) / 2;
 
@@ -245,7 +219,23 @@ public class ScreenCaptureService
         throw new NullReferenceException("Выбранная фигура не может быть null");
     }
 
-    private BitmapImage MakeScreenshot(System.Windows.Forms.Screen screen)
+    private void UpdateSizeTextBlockPosition()
+    {
+        if (_selectionRectangle == null || _sizeTextBlock == null)
+        {
+            return;
+        }
+
+        var left = Canvas.GetLeft(_selectionRectangle) + _selectionRectangle.Width / 2 -
+                   _sizeTextBlock.ActualWidth / 2;
+        var top = Canvas.GetTop(_selectionRectangle) + _selectionRectangle.Height / 2 -
+                  _sizeTextBlock.ActualHeight / 2;
+
+        Canvas.SetLeft(_sizeTextBlock, left);
+        Canvas.SetTop(_sizeTextBlock, top);
+    }
+
+    private static BitmapImage MakeScreenshot(System.Windows.Forms.Screen screen)
     {
         using (var bitmap = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
         {
