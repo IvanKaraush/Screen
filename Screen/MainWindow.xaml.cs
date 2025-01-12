@@ -62,7 +62,7 @@ public partial class MainWindow
 
     private void InitializeTrayIcon()
     {
-        if (StartupManager.IsEnabled)
+        if (StartupManager.IsSilentMode)
         {
             this.Hide();
         }
