@@ -62,4 +62,9 @@ public class MainViewModel
     {
         _currentDrawService?.MouseUp();
     }
+
+    public void DisableAllSelectCommands()
+    {
+        _currentDrawService = null;
+    }
 }

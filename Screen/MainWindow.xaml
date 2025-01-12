@@ -44,8 +44,10 @@
                 </ComboBoxItem>
                 <ComboBoxItem>
                     <Border Width="50" Height="50" BorderBrush="Black" BorderThickness="2">
-                        <TextBlock Text="T" FontSize="35" FontWeight="Bold" VerticalAlignment="Center"
+                        <Button Click="AddTextWithBorder_Click">
+                            <TextBlock Text="T" FontSize="35" FontWeight="Bold" VerticalAlignment="Center"
                                    HorizontalAlignment="Center" />
+                        </Button>
                     </Border>
                 </ComboBoxItem>
             </ComboBox>

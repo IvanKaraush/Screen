@@ -13,8 +13,10 @@ using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using ComboBox = System.Windows.Controls.ComboBox;
 using Cursors = System.Windows.Input.Cursors;
+using FlowDirection = System.Windows.FlowDirection;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using TextBox = System.Windows.Controls.TextBox;
 
@@ -37,6 +39,9 @@ public partial class MainWindow
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
     private readonly DragService _dragService = new();
+    private bool _isAddingTextBox;
+    private bool _isAddingTextBoxWithBorder;
+    private TextBox? _newTextBox;
 
     public MainWindow()
     {
@@ -233,29 +238,45 @@ public partial class MainWindow
             comboBox.SelectedIndex = 0;
         }
     }
-    
+
+
     private void AddTextBox_Click(object sender, RoutedEventArgs e)
     {
-        var newTextBox = new TextBox
+        _viewModel.DisableAllSelectCommands(); 
+        _isAddingTextBox = true; 
+
+        DrawingCanvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
+    }
+
+    private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isAddingTextBox) return;
+
+        Point clickPosition = e.GetPosition(DrawingCanvas);
+
+        _newTextBox = new TextBox
         {
             Width = 200,
             Height = 30,
             Text = "Введите текст...",
             FontSize = 14,
             Foreground = _viewModel.SelectedBrush,
-            Background = Brushes.Transparent, 
-            BorderThickness = new Thickness(0), 
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
         };
 
-        Canvas.SetLeft(newTextBox, 50);
-        Canvas.SetTop(newTextBox, 50);
+        Canvas.SetLeft(_newTextBox, clickPosition.X);
+        Canvas.SetTop(_newTextBox, clickPosition.Y);
 
-        newTextBox.GotFocus += TextBox_GotFocus;
-        newTextBox.LostFocus += TextBox_LostFocus;
+        _newTextBox.GotFocus += TextBox_GotFocus;
+        _newTextBox.LostFocus += TextBox_LostFocus;
 
-        DrawingCanvas.Children.Add(newTextBox);
+        DrawingCanvas.Children.Add(_newTextBox);
+
+        _isAddingTextBox = false;
+        DrawingCanvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
     }
-    
+
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)
     {
         if (sender is not TextBox { Text: "Введите текст..." } textBox) return;
@@ -268,9 +289,116 @@ public partial class MainWindow
         textBox.Text = "Введите текст...";
         textBox.Foreground = Brushes.Gray;
     }
+    
+    private void AddTextWithBorder_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.DisableAllSelectCommands();
+        _isAddingTextBoxWithBorder = true;
+
+        DrawingCanvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown_ForBorderTextBox;
+    }
+
+    private void Canvas_MouseLeftButtonDown_ForBorderTextBox(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isAddingTextBoxWithBorder) return;
+
+        Point clickPosition = e.GetPosition(DrawingCanvas);
+
+        var border = new Border
+        {
+            BorderBrush = _viewModel.SelectedBrush,
+            BorderThickness = new Thickness(1),
+            Background = Brushes.Black,
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(2),
+            SnapsToDevicePixels = true
+        };
+
+        var textBox = new TextBox
+        {
+            Text = "Введите текст...",
+            FontSize = 14,
+            Foreground = _viewModel.SelectedBrush,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            AcceptsReturn = true, 
+            TextWrapping = TextWrapping.Wrap, 
+            MinWidth = 50, 
+            MinHeight = 20
+        };
+
+        textBox.GotFocus += (s, args) =>
+        {
+            if (textBox.Text == "Введите текст...")
+            {
+                textBox.Text = "";
+                textBox.Foreground = Brushes.White;
+            }
+        };
+
+        textBox.LostFocus += (s, args) =>
+        {
+            if (string.IsNullOrWhiteSpace(textBox.Text))
+            {
+                textBox.Text = "Введите текст...";
+                textBox.Foreground = Brushes.Gray;
+            }
+        };
+
+        textBox.TextChanged += (s, args) =>
+        {
+            textBox.Width = MeasureTextWidth(textBox) + 10; 
+            textBox.Height = MeasureTextHeight(textBox) + 4; 
+        };
+
+        border.Child = textBox;
+
+        Canvas.SetLeft(border, clickPosition.X);
+        Canvas.SetTop(border, clickPosition.Y);
+
+        DrawingCanvas.Children.Add(border);
+
+        textBox.Focus();
+
+        _isAddingTextBoxWithBorder = false;
+        DrawingCanvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown_ForBorderTextBox;
+    }
+
+    [Obsolete("Obsolete")]
+    private double MeasureTextWidth(TextBox textBox)
+    {
+        var formattedText = new FormattedText(
+            textBox.Text,
+            System.Globalization.CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+            textBox.FontSize,
+            Brushes.Black,
+            new NumberSubstitution(),
+            TextFormattingMode.Display);
+
+        return formattedText.Width;
+    }
+
+    [Obsolete("Obsolete")]
+    private double MeasureTextHeight(TextBox textBox)
+    {
+        var formattedText = new FormattedText(
+            textBox.Text,
+            System.Globalization.CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+            textBox.FontSize,
+            Brushes.Black,
+            new NumberSubstitution(),
+            TextFormattingMode.Display);
+
+        return formattedText.Height;
+    }
 
     private void EnableDragButton_Click(object sender, RoutedEventArgs e)
     {
+        _viewModel.DisableAllSelectCommands();
         foreach (var child in DrawingCanvas.Children)
         {
             if (child is UIElement element)
