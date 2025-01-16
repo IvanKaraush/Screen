@@ -1,14 +1,13 @@
-﻿using System.Windows;
-using Screen.Services;
+﻿using Screen.Services;
 
 namespace Screen;
 
-public partial class SettingsWindow : Window
+public partial class SettingsWindow
 {
     public SettingsWindow()
     {
         InitializeComponent();
-        StartupCheckBox.IsChecked = StartupManager.IsEnabled;
+        StartupCheckBox.IsChecked = StartupManager.IsAddedToStartup;
     }
 
     private void Window_Closed(object sender, EventArgs e)
