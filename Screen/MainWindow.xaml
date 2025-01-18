@@ -9,9 +9,6 @@
         </Grid.RowDefinitions>
         
         <ToolBar Grid.Row="0">
-            <Button Width="80" Height="80">
-                <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">🧹</TextBlock>
-            </Button>
 			<Button Width="80" Height="80" >
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
@@ -48,7 +45,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Width="80" Height="80" Content="Blur test" Click="MakeBlurButton">
+            <Button Width="80" Height="80" Content="Blur" Click="MakeBlurButton">
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Intensity of Blur:" />
