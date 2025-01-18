@@ -2,7 +2,6 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Application = System.Windows.Application;
@@ -118,7 +117,7 @@ public class ScreenCaptureService
         return screenshot;
     }
 
-    public void MouseMove(Window overlay, Point currentPosition)
+    public void MouseMove(Window overlay, Point startPosition)
     {
         if (_selectionRectangle == null)
         {
