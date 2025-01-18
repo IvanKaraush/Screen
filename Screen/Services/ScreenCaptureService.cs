@@ -23,7 +23,7 @@ public class ScreenCaptureService
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
     private TextBlock? _sizeTextBlock;
-    private Popup? _textPopup;
+    private readonly Popup? _textPopup = new();
     public List<Window> Overlays { get; } = [];
 
     public Window StartScreenCapture(System.Windows.Forms.Screen screen)
