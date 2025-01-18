@@ -73,6 +73,11 @@ public partial class MainWindow
 
     private void InitializeTrayIcon()
     {
+        if (StartupManager.IsSilentMode)
+        {
+            this.Hide();
+        }
+
         _trayIcon = new NotifyIcon
         {
             Icon = new Icon(SystemIcons.Application, 40, 40),
@@ -121,7 +126,7 @@ public partial class MainWindow
 
     private void Overlay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        ShowPreviewWindow(_screenCaptureService.StopCapture());
+        ShowPreviewWindow(_screenCaptureService.MouseLeftButtonUp());
     }
 
     private void ShowPreviewWindow(Bitmap screenshot)
@@ -134,7 +139,7 @@ public partial class MainWindow
     private void Overlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         var overlay = (Window)sender;
-        _screenCaptureService.StartCapture(overlay, e.GetPosition(overlay));
+        _screenCaptureService.MouseLeftButtonDown(overlay, e.GetPosition(overlay));
     }
 
     private void ShowWindow(object? sender, EventArgs e)
@@ -154,7 +159,7 @@ public partial class MainWindow
     private void Overlay_MouseMove(object sender, MouseEventArgs e)
     {
         var overlay = (Window)sender;
-        _screenCaptureService.ChangeScreenFigure(overlay, e.GetPosition(overlay));
+        _screenCaptureService.MouseMove(overlay, e.GetPosition(overlay));
     }
 
     private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -189,16 +194,17 @@ public partial class MainWindow
 
     private void PreviewImageBlur_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        _blurImageService.StartBlurRectangle(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
+        _blurImageService.MouseLeftButtonDown(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
     }
 
     private void PreviewImageBlur_MouseLeftButtonMove(object sender, MouseEventArgs e)
     {
-        _blurImageService.ProcessedBlurRectangle(e.GetPosition(PreviewImage));
+        _blurImageService.MouseLeftButtonMove(e.GetPosition(PreviewImage));
     }
 
     private void PreviewImageBlur_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        PreviewImage.Cursor = Cursors.Arrow;
         PreviewImage.MouseDown -= PreviewImageBlur_MouseLeftButtonDown;
         PreviewImage.MouseMove -= PreviewImageBlur_MouseLeftButtonMove;
         PreviewImage.MouseUp -= PreviewImageBlur_MouseLeftButtonUp;
@@ -206,12 +212,18 @@ public partial class MainWindow
         var intensity = (int)BlurIntensitySlider.Value;
         _blurImageService.MakeBlur((BitmapSource)PreviewImage.Source);
 
-        var blurredBitmap = _blurImageService.StopBlurRectangle(PreviewImage.Parent as Canvas, intensity);
+        var blurredBitmap = _blurImageService.MouseLeftButtonUp(PreviewImage.Parent as Canvas, intensity);
 
         PreviewImage.Source = null;
         PreviewImage.Source = blurredBitmap == null
             ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
             : blurredBitmap.ToBitmapSource();
+    }
+
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow();
+        settingsWindow.ShowDialog();
     }
 
     private void ComboBox_DropDownOpened(object sender, EventArgs e)

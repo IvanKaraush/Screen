@@ -51,9 +51,8 @@
                     </Border>
                 </ComboBoxItem>
             </ComboBox>
-            <ComboBox Width="40" Height="30" DropDownOpened="ComboBox_DropDownOpened" />
-
-            <Button Width="80" Height="80" Content="Blur test" Click="MakeBlurButton">
+            <Button Width="80" Height="80" Click="MakeBlurButton">
+                <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Intensity of Blur:" />
@@ -61,6 +60,8 @@
                         TickFrequency="10" IsSnapToTickEnabled="True" />
                 <TextBlock Text="{Binding ElementName=BlurIntensitySlider, Path=Value, StringFormat=Blur: {0}%}" />
             </StackPanel>
+            
+            <Button Content="Настройки" Width="100" Height="50" Click="SettingsButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top" />
         </ToolBar>
 
         <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -71,6 +72,7 @@
                 <StackPanel x:Name="TextBoxContainer" Margin="0,10,0,0" />
             </Canvas>
         </ScrollViewer>
+
 
 
     </Grid>
