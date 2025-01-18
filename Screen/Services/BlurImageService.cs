@@ -98,7 +98,7 @@ public class BlurImageService
         blurredBitmap.UnlockBits(bitmapData);
 
         // Теперь наложим заблюренную область обратно на оригинальное изображение
-        using (Graphics g = Graphics.FromImage(_originalBitmap))
+        using (var g = Graphics.FromImage(_originalBitmap))
         {
             g.DrawImage(blurredBitmap, rect, rect, GraphicsUnit.Pixel);
         }

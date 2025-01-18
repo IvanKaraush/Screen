@@ -148,7 +148,7 @@ public partial class MainWindow
     private void Overlay_MouseMove(object sender, MouseEventArgs e)
     {
         var overlay = (Window)sender;
-        _screenCaptureService.MouseMove(overlay, e.GetPosition(overlay));
+        _screenCaptureService.MouseMove(e.GetPosition(overlay));
     }
 
     private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
