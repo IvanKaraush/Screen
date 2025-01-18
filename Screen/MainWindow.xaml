@@ -45,7 +45,8 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Width="80" Height="80" Content="Blur" Click="MakeBlurButton">
+            <Button Width="80" Height="80" Click="MakeBlurButton">
+                <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Intensity of Blur:" />
