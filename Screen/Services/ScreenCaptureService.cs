@@ -2,12 +2,14 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Cursor = System.Windows.Forms.Cursor;
 using Cursors = System.Windows.Input.Cursors;
+using FlowDirection = System.Windows.FlowDirection;
+using FontFamily = System.Windows.Media.FontFamily;
 using MessageBox = System.Windows.MessageBox;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
@@ -22,8 +24,6 @@ public class ScreenCaptureService
     private bool _isSelecting;
     private Rectangle? _selectionRectangle;
     private Point _startPoint;
-    private TextBlock? _sizeTextBlock;
-    private readonly Popup? _textPopup = new();
     public List<Window> Overlays { get; } = [];
 
     public Window StartScreenCapture(System.Windows.Forms.Screen screen)
@@ -83,7 +83,6 @@ public class ScreenCaptureService
 
         _isSelecting = true;
         _startPoint = startPosition;
-
         _selectionRectangle = new Rectangle
         {
             Fill = Brushes.Transparent,
@@ -91,24 +90,9 @@ public class ScreenCaptureService
             StrokeThickness = 2
         };
 
-        _sizeTextBlock = new TextBlock
-        {
-            Foreground = Brushes.White,
-            Background = Brushes.Black,
-            FontSize = 14
-        };
-
-        _selectionRectangle.SizeChanged += (_, _) => { UpdateSizeTextBlockPosition(); };
-        _sizeTextBlock.SizeChanged += (_, _) => { UpdateSizeTextBlockPosition(); };
-
         var canvas = new Canvas();
         canvas.Children.Add(_selectionRectangle);
-        canvas.Children.Add(_sizeTextBlock);
-
         overlay.Content = canvas;
-
-        Canvas.SetLeft(_sizeTextBlock, _selectionRectangle.Width - _sizeTextBlock.ActualWidth);
-        Canvas.SetTop(_sizeTextBlock, _selectionRectangle.Height - _sizeTextBlock.ActualHeight);
     }
 
     public Bitmap MouseLeftButtonUp()
@@ -118,12 +102,6 @@ public class ScreenCaptureService
         {
             overlay.Hide();
             overlay.Close();
-        }
-
-        // Закрыть и скрыть текстовое окно
-        if (_textPopup != null)
-        {
-            _textPopup.IsOpen = false;
         }
 
         var screenshot = CaptureScreenshot();
@@ -139,47 +117,72 @@ public class ScreenCaptureService
         return screenshot;
     }
 
-    public void MouseMove(Point currentPosition)
+    public void MouseMove(Window overlay, Point startPosition)
     {
-        if (_selectionRectangle == null || _sizeTextBlock == null)
+        if (_selectionRectangle == null)
         {
             return;
         }
 
-        var x = Math.Min(_startPoint.X, currentPosition.X);
-        var y = Math.Min(_startPoint.Y, currentPosition.Y);
-        var width = Math.Abs(_startPoint.X - currentPosition.X);
-        var height = Math.Abs(_startPoint.Y - currentPosition.Y);
+        var x = Math.Min(_startPoint.X, startPosition.X);
+        var y = Math.Min(_startPoint.Y, startPosition.Y);
+        var width = Math.Abs(_startPoint.X - startPosition.X);
+        var height = Math.Abs(_startPoint.Y - startPosition.Y);
 
         Canvas.SetLeft(_selectionRectangle, x);
         Canvas.SetTop(_selectionRectangle, y);
         _selectionRectangle.Width = width;
         _selectionRectangle.Height = height;
 
-        UpdateTextPopup(width, height);
-        _sizeTextBlock.Text = $"{(int)width}x{(int)height}";
+        var overlayBrush = new DrawingBrush
+        {
+            Drawing = new DrawingGroup
+            {
+                Children =
+                {
+                    // Затемнённая область с вырезанным прямоугольником
+                    new GeometryDrawing
+                    {
+                        Geometry = new CombinedGeometry(
+                            GeometryCombineMode.Exclude,
+                            new RectangleGeometry(new Rect(0, 0, overlay.Width, overlay.Height)),
+                            new RectangleGeometry(new Rect(x, y, width, height))
+                        ),
+                        Brush = Brushes.Black
+                    },
+                    // Текст
+                    new GeometryDrawing
+                    {
+                        Geometry = BuildTextGeometry($"{(int)width}x{(int)height}", x + width / 2, y + height / 2),
+                        Brush = Brushes.White
+                    }
+                }
+            },
+        };
+
+        overlay.OpacityMask = overlayBrush;
     }
 
-    private void UpdateTextPopup(double width, double height)
+    private static Geometry BuildTextGeometry(string text, double centerX, double centerY)
     {
-        if (_sizeTextBlock == null || _textPopup == null || _selectionRectangle == null)
-        {
-            return;
-        }
+        var typeface = new Typeface(
+            new FontFamily(),
+            FontStyles.Normal,
+            FontWeights.Normal,
+            FontStretches.Normal);
 
-        _sizeTextBlock.Text = $"{(int)width + 1}x{(int)height + 1}";
+        var formattedText = new FormattedText(
+            text,
+            System.Globalization.CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            16,
+            Brushes.Transparent,
+            VisualTreeHelper.GetDpi(Application.Current.MainWindow).PixelsPerDip);
 
-        if (_selectionRectangle.Parent is Visual parentVisual)
-        {
-            var rectPosition = _selectionRectangle
-                .TransformToAncestor(parentVisual)
-                .Transform(new Point(0, 0));
-
-            _textPopup.HorizontalOffset = rectPosition.X + (width - _sizeTextBlock.ActualWidth) / 2;
-            _textPopup.VerticalOffset = rectPosition.Y + (height - _sizeTextBlock.ActualHeight) / 2;
-
-            _textPopup.IsOpen = true;
-        }
+        // Центрируем текст относительно указанных координат
+        return formattedText.BuildGeometry(new Point(centerX - formattedText.Width / 2,
+            centerY - formattedText.Height / 2));
     }
 
     private Bitmap CaptureScreenshot()
@@ -219,23 +222,7 @@ public class ScreenCaptureService
         throw new NullReferenceException("Выбранная фигура не может быть null");
     }
 
-    private void UpdateSizeTextBlockPosition()
-    {
-        if (_selectionRectangle == null || _sizeTextBlock == null)
-        {
-            return;
-        }
-
-        var left = Canvas.GetLeft(_selectionRectangle) + _selectionRectangle.Width / 2 -
-                   _sizeTextBlock.ActualWidth / 2;
-        var top = Canvas.GetTop(_selectionRectangle) + _selectionRectangle.Height / 2 -
-                  _sizeTextBlock.ActualHeight / 2;
-
-        Canvas.SetLeft(_sizeTextBlock, left);
-        Canvas.SetTop(_sizeTextBlock, top);
-    }
-
-    private static BitmapImage MakeScreenshot(System.Windows.Forms.Screen screen)
+    private BitmapImage MakeScreenshot(System.Windows.Forms.Screen screen)
     {
         using (var bitmap = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
         {
