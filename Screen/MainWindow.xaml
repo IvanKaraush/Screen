@@ -51,6 +51,7 @@
                     </Border>
                 </ComboBoxItem>
             </ComboBox>
+            <ComboBox Width="40" Height="30" DropDownOpened="ComboBox_DropDownOpened" />
             <Button Width="80" Height="80" Click="MakeBlurButton">
                 <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
