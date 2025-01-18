@@ -62,6 +62,11 @@ public partial class MainWindow
 
     private void InitializeTrayIcon()
     {
+        if (StartupManager.IsSilentMode)
+        {
+            this.Hide();
+        }
+
         _trayIcon = new NotifyIcon
         {
             Icon = new Icon(SystemIcons.Application, 40, 40),
@@ -202,5 +207,11 @@ public partial class MainWindow
         PreviewImage.Source = blurredBitmap == null
             ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
             : blurredBitmap.ToBitmapSource();
+    }
+
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow();
+        settingsWindow.ShowDialog();
     }
 }
