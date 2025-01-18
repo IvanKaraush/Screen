@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Application = System.Windows.Application;
@@ -124,10 +125,10 @@ public class ScreenCaptureService
             return;
         }
 
-        var x = Math.Min(_startPoint.X, currentPosition.X);
-        var y = Math.Min(_startPoint.Y, currentPosition.Y);
-        var width = Math.Abs(_startPoint.X - currentPosition.X);
-        var height = Math.Abs(_startPoint.Y - currentPosition.Y);
+        var x = Math.Min(_startPoint.X, startPosition.X);
+        var y = Math.Min(_startPoint.Y, startPosition.Y);
+        var width = Math.Abs(_startPoint.X - startPosition.X);
+        var height = Math.Abs(_startPoint.Y - startPosition.Y);
 
         Canvas.SetLeft(_selectionRectangle, x);
         Canvas.SetTop(_selectionRectangle, y);

@@ -54,6 +54,8 @@
                         TickFrequency="10" IsSnapToTickEnabled="True" />
                 <TextBlock Text="{Binding ElementName=BlurIntensitySlider, Path=Value, StringFormat=Blur: {0}%}" />
             </StackPanel>
+            
+            <Button Content="Настройки" Width="100" Height="50" Click="SettingsButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top" />
         </ToolBar>
         
         <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
