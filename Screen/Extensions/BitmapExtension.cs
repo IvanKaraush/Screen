@@ -22,4 +22,16 @@ public static class BitmapExtension
             return bitmapImage;
         }
     }
+    
+    public static Bitmap ToBitmap(this BitmapSource bitmapSource)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            encoder.Save(memoryStream);
+
+            return new Bitmap(memoryStream);
+        }
+    }
 }

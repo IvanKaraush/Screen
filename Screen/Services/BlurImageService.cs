@@ -1,5 +1,4 @@
 using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -7,6 +6,7 @@ using System.Windows.Media.Imaging;
 using Image = System.Drawing.Image;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Point = System.Windows.Point;
+using Screen.Extensions;
 
 namespace Screen.Services;
 
@@ -18,7 +18,7 @@ public class BlurImageService
 
     public Bitmap MakeBlur(BitmapSource previewImage)
     {
-        _originalBitmap = BitmapFromImageSource(previewImage);
+        _originalBitmap = previewImage.ToBitmap();
         return _originalBitmap;
     }
 
@@ -174,18 +174,6 @@ public class BlurImageService
                 resultBuffer[resultOffset + 2] = (byte)blurredPixel[2];
                 resultBuffer[resultOffset + 3] = 255; // Alpha
             }
-        }
-    }
-
-    private static Bitmap BitmapFromImageSource(BitmapSource bitmapSource)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-            encoder.Save(memoryStream);
-
-            return new Bitmap(memoryStream);
         }
     }
 }

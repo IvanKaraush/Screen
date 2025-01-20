@@ -27,6 +27,7 @@ public partial class MainWindow
 
     private NotifyIcon _trayIcon;
     private readonly BlurImageService _blurImageService;
+    private readonly CroppingImageService _croppingImageService;
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
@@ -41,6 +42,7 @@ public partial class MainWindow
         _viewModel = new MainViewModel();
         DataContext = _viewModel;
         _blurImageService = new BlurImageService();
+        _croppingImageService = new CroppingImageService();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -207,6 +209,40 @@ public partial class MainWindow
         PreviewImage.Source = blurredBitmap == null
             ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
             : blurredBitmap.ToBitmapSource();
+    }
+    
+    private void MakeCropButton(object sender, RoutedEventArgs e)
+    {
+        PreviewImage.Cursor = Cursors.Cross;
+        PreviewImage.MouseDown += PreviewImageCrop_MouseLeftButtonDown;
+        PreviewImage.MouseMove += PreviewImageCrop_MouseLeftButtonMove;
+        PreviewImage.MouseUp += PreviewImageCrop_MouseLeftButtonUp;
+    }
+
+    private void PreviewImageCrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _croppingImageService.MouseLeftButtonDown(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
+    }
+
+    private void PreviewImageCrop_MouseLeftButtonMove(object sender, MouseEventArgs e)
+    {
+        _croppingImageService.MouseLeftButtonMove(e.GetPosition(PreviewImage));
+    }
+
+    private void PreviewImageCrop_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        PreviewImage.Cursor = Cursors.Arrow;
+        PreviewImage.MouseDown -= PreviewImageCrop_MouseLeftButtonDown;
+        PreviewImage.MouseMove -= PreviewImageCrop_MouseLeftButtonMove;
+        PreviewImage.MouseUp -= PreviewImageCrop_MouseLeftButtonUp;
+
+        _croppingImageService.SetImage((BitmapSource)PreviewImage.Source);
+
+        var croppedBitmap = _croppingImageService.MouseLeftButtonUp(PreviewImage.Parent as Canvas);
+
+        PreviewImage.Source = croppedBitmap == null
+            ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
+            : croppedBitmap.ToBitmapSource();
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
