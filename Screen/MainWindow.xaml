@@ -4,19 +4,19 @@
         Title="Screen" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> 
-            <RowDefinition Height="*"/> 
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
+
         <ToolBar Grid.Row="0">
-			<Button Width="80" Height="80" >
+            <Button Width="80" Height="80">
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
-			</Button>
-            <Button Width="80" Height="80"  Command="{Binding SelectRectangleCommand}">
-                <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
+            </Button>
+            <Button Width="80" Height="80" Command="{Binding SelectRectangleCommand}">
+                <Rectangle Width="38" Height="38" Stroke="Black" Fill="Transparent" />
             </Button>
             <Button Width="80" Height="80" Command="{Binding SelectEllipseCommand}">
-                <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent"/>
+                <Ellipse Width="38" Height="38" Stroke="Black" Fill="Transparent" />
             </Button>
             <Button Width="80" Height="80" Command="{Binding SelectArrowCommand}">
                 <TextBlock FontSize="36" VerticalAlignment="Center" HorizontalAlignment="Center">↗</TextBlock>
@@ -29,15 +29,15 @@
             </Button>
             <ComboBox Width="50" Height="30" SelectedItem="{Binding SelectedBrush, Mode=TwoWay}">
                 <ComboBox.Items>
-                    <SolidColorBrush Color="Red"/>
-                    <SolidColorBrush Color="Green"/>
-                    <SolidColorBrush Color="Blue"/>
-                    <SolidColorBrush Color="Yellow"/>
-                    <SolidColorBrush Color="Black"/>
-                    <SolidColorBrush Color="White"/>
-                    <SolidColorBrush Color="DarkSlateGray"/>
-                    <SolidColorBrush Color="HotPink"/>
-                    <SolidColorBrush Color="Brown"/>
+                    <SolidColorBrush Color="Red" />
+                    <SolidColorBrush Color="Green" />
+                    <SolidColorBrush Color="Blue" />
+                    <SolidColorBrush Color="Yellow" />
+                    <SolidColorBrush Color="Black" />
+                    <SolidColorBrush Color="White" />
+                    <SolidColorBrush Color="DarkSlateGray" />
+                    <SolidColorBrush Color="HotPink" />
+                    <SolidColorBrush Color="Brown" />
                 </ComboBox.Items>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -46,27 +46,26 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Button Width="80" Height="80" Click="MakeBlurButton">
-                <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
                 <Label Content="Intensity of Blur:" />
-                <Slider x:Name="BlurIntensitySlider" Minimum="0" Maximum="100" Value="50" 
+                <Slider x:Name="BlurIntensitySlider" Minimum="0" Maximum="100" Value="50"
                         TickFrequency="10" IsSnapToTickEnabled="True" />
                 <TextBlock Text="{Binding ElementName=BlurIntensitySlider, Path=Value, StringFormat=Blur: {0}%}" />
             </StackPanel>
-            
-            <Button Content="Настройки" Width="100" Height="50" Click="SettingsButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top" />
+
+            <Button Content="Настройки" Width="100" Height="50" Click="SettingsButton_Click"
+                    HorizontalAlignment="Center" VerticalAlignment="Top" />
         </ToolBar>
-        
+
         <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <Canvas x:Name="DrawingCanvas" MouseDown="Canvas_MouseDown" 
-                    MouseMove="Canvas_MouseMove" 
+            <Canvas x:Name="DrawingCanvas" MouseDown="Canvas_MouseDown"
+                    MouseMove="Canvas_MouseMove"
                     MouseUp="Canvas_MouseUp">
-                <Image x:Name="PreviewImage" Stretch="None"/>
+                <Image x:Name="PreviewImage" Stretch="None" />
             </Canvas>
         </ScrollViewer>
-
-
 
     </Grid>
 </Window>
