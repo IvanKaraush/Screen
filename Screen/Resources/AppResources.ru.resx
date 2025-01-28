@@ -17,4 +17,10 @@
     <data name="Settings.SaveChangesMessage" xml:space="preserve">
         <value>Сохранить изменения</value>
     </data>
+    <data name="Settings.SelectLanguageMessage" xml:space="preserve">
+        <value>Выберите язык</value>
+    </data>
+    <data name="MainWindow.IntensityOfBlurMessage" xml:space="preserve">
+        <value>Интенсивность блюра</value>
+    </data>
 </root>

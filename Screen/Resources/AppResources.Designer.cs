@@ -60,6 +60,15 @@ namespace Screen.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Интенсивность блюра.
+        /// </summary>
+        public static string MainWindow_IntensityOfBlurMessage {
+            get {
+                return ResourceManager.GetString("MainWindow.IntensityOfBlurMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Запускать при старте.
         /// </summary>
         public static string Settings_RunOnStartupMessage {
@@ -74,6 +83,15 @@ namespace Screen.Resources {
         public static string Settings_SaveChangesMessage {
             get {
                 return ResourceManager.GetString("Settings.SaveChangesMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Выберите язык.
+        /// </summary>
+        public static string Settings_SelectLanguageMessage {
+            get {
+                return ResourceManager.GetString("Settings.SelectLanguageMessage", resourceCulture);
             }
         }
     }

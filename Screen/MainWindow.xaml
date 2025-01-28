@@ -1,6 +1,7 @@
 ﻿<Window x:Class="Screen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:resources="clr-namespace:Screen.Resources"
         Title="Screen" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -49,7 +50,7 @@
                 <TextBlock Text="💧" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Button>
             <StackPanel Orientation="Vertical" Margin="10">
-                <Label Content="Intensity of Blur:" />
+                <Label Content="{x:Static resources:AppResources.MainWindow_IntensityOfBlurMessage}" />
                 <Slider x:Name="BlurIntensitySlider" Minimum="0" Maximum="100" Value="50"
                         TickFrequency="10" IsSnapToTickEnabled="True" />
                 <TextBlock Text="{Binding ElementName=BlurIntensitySlider, Path=Value, StringFormat=Blur: {0}%}" />
