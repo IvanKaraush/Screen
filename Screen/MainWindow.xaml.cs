@@ -32,6 +32,7 @@ public partial class MainWindow
 
     private const int WmHotkey = 0x0312;
     private const int HotkeyId = 9000;
+    private const string InputText = "Введите текст...";
 
     private NotifyIcon _trayIcon;
     private readonly BlurImageService _blurImageService;
@@ -273,7 +274,7 @@ public partial class MainWindow
         {
             Width = 200,
             Height = 30,
-            Text = "Введите текст...",
+            Text = InputText,
             FontSize = 14,
             Foreground = _viewModel.SelectedBrush,
             Background = Brushes.Transparent,
@@ -294,7 +295,7 @@ public partial class MainWindow
 
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is not TextBox { Text: "Введите текст..." } textBox)
+        if (sender is not TextBox { Text: InputText } textBox)
         {
             return;
         }
@@ -307,7 +308,7 @@ public partial class MainWindow
         {
             return;
         }
-        textBox.Text = "Введите текст...";
+        textBox.Text = InputText;
         textBox.Foreground = Brushes.Gray;
     }
     
@@ -337,7 +338,7 @@ public partial class MainWindow
 
         var textBox = new TextBox
         {
-            Text = "Введите текст...",
+            Text = InputText,
             FontSize = 14,
             Foreground = _viewModel.SelectedBrush,
             Background = Brushes.Transparent,
@@ -350,7 +351,7 @@ public partial class MainWindow
 
         textBox.GotFocus += (_, _) =>
         {
-            if (textBox.Text == "Введите текст...")
+            if (textBox.Text == InputText)
             {
                 textBox.Text = "";
                 textBox.Foreground = Brushes.White;
@@ -361,7 +362,7 @@ public partial class MainWindow
         {
             if (string.IsNullOrWhiteSpace(textBox.Text))
             {
-                textBox.Text = "Введите текст...";
+                textBox.Text = InputText;
                 textBox.Foreground = Brushes.Gray;
             }
         };
@@ -389,7 +390,7 @@ public partial class MainWindow
    private double MeasureTextWidth(TextBox textBox)
 {
     var source = PresentationSource.FromVisual(textBox);
-    double pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+    var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
 
     var formattedText = new FormattedText(
         textBox.Text,
@@ -406,7 +407,7 @@ public partial class MainWindow
 private double MeasureTextHeight(TextBox textBox)
 {
     var source = PresentationSource.FromVisual(textBox);
-    double pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+    var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
 
     var formattedText = new FormattedText(
         textBox.Text,
