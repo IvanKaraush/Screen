@@ -29,10 +29,7 @@ public class ClipService
 
     public void MouseMove(Point currentPoint)
     {
-        if (_currentRectangle == null)
-        {
-            return;
-        }
+        if (_currentRectangle == null) return;
 
         var x = Math.Min(_startPoint.X, currentPoint.X);
         var y = Math.Min(_startPoint.Y, currentPoint.Y);

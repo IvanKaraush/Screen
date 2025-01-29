@@ -12,7 +12,7 @@ namespace Screen.Models;
 
 public class MainViewModel
 {
-    private readonly Dictionary<ServiceNames, dynamic> _drawServices;
+    private readonly Dictionary<ServiceNamesEnum, dynamic> _drawServices;
     private dynamic? _currentDrawService;
 
     // ReSharper disable once MemberCanBePrivate.Global
@@ -27,21 +27,21 @@ public class MainViewModel
     {
         SelectedBrush = Brushes.White;
 
-        _drawServices = new Dictionary<ServiceNames, dynamic>
+        _drawServices = new Dictionary<ServiceNamesEnum, dynamic>
         {
-            { ServiceNames.Rectangle, new ClipService() },
-            { ServiceNames.Ellipse, new EllipseService() },
-            { ServiceNames.Arrow, new DrawArrowService() },
-            { ServiceNames.Line, new DrawLineService() }
+            { ServiceNamesEnum.Rectangle, new ClipService() },
+            { ServiceNamesEnum.Ellipse, new EllipseService() },
+            { ServiceNamesEnum.Arrow, new DrawArrowService() },
+            { ServiceNamesEnum.Line, new DrawLineService() },
         };
 
-        SelectRectangleCommand = new RelayCommand(_ => SelectService(ServiceNames.Rectangle));
-        SelectEllipseCommand = new RelayCommand(_ => SelectService(ServiceNames.Ellipse));
-        SelectArrowCommand = new RelayCommand(_ => SelectService(ServiceNames.Arrow));
-        SelectLineCommand = new RelayCommand(_ => SelectService(ServiceNames.Line));
+        SelectRectangleCommand = new RelayCommand(_ => SelectService(ServiceNamesEnum.Rectangle));
+        SelectEllipseCommand = new RelayCommand(_ => SelectService(ServiceNamesEnum.Ellipse));
+        SelectArrowCommand = new RelayCommand(_ => SelectService(ServiceNamesEnum.Arrow));
+        SelectLineCommand = new RelayCommand(_ => SelectService(ServiceNamesEnum.Line));
     }
 
-    private void SelectService(ServiceNames key)
+    private void SelectService(ServiceNamesEnum key)
     {
         _currentDrawService = _drawServices.TryGetValue(key, out var service)
             ? service
@@ -61,5 +61,10 @@ public class MainViewModel
     public void MouseUp()
     {
         _currentDrawService?.MouseUp();
+    }
+
+    public void DisableAllSelectCommands()
+    {
+        _currentDrawService = null;
     }
 }

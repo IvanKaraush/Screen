@@ -3,14 +3,21 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using Screen.Models;
 using System.Windows.Media.Imaging;
 using Screen.Extensions;
 using Screen.Services;
 using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
+using ComboBox = System.Windows.Controls.ComboBox;
 using Cursors = System.Windows.Input.Cursors;
+using FlowDirection = System.Windows.FlowDirection;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Rectangle = System.Windows.Shapes.Rectangle;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Screen;
 
@@ -24,13 +31,17 @@ public partial class MainWindow
 
     private const int WmHotkey = 0x0312;
     private const int HotkeyId = 9000;
+    private const string InputText = "Введите текст...";
 
     private NotifyIcon _trayIcon;
     private readonly BlurImageService _blurImageService;
     private readonly ScreenCaptureService _screenCaptureService;
     private bool _printScreenPressed;
     private readonly MainViewModel _viewModel;
-
+    private readonly DragService _dragService = new();
+    private bool _isAddingTextBox;
+    private bool _isAddingTextBoxWithBorder;
+    private TextBox? _newTextBox;
 
     public MainWindow()
     {
@@ -213,5 +224,211 @@ public partial class MainWindow
     {
         var settingsWindow = new SettingsWindow();
         settingsWindow.ShowDialog();
+    }
+
+    private void ComboBox_DropDownOpened(object sender, EventArgs e)
+    {
+        var colorDialog = new ColorDialog();
+        if (colorDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+
+        var selectedColor = colorDialog.Color;
+
+        _viewModel.SelectedBrush =
+            new SolidColorBrush(Color.FromArgb(selectedColor.A, selectedColor.R, selectedColor.G, selectedColor.B));
+
+        if (sender is ComboBox comboBox)
+        {
+            comboBox.Items.Clear();
+            var rectangle = new Rectangle
+            {
+                Width = 20,
+                Height = 20,
+                Fill = _viewModel.SelectedBrush
+            };
+
+            comboBox.Items.Add(rectangle);
+            comboBox.SelectedIndex = 0;
+        }
+    }
+
+
+    private void AddTextBox_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.DisableAllSelectCommands(); 
+        _isAddingTextBox = true; 
+
+        DrawingCanvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
+    }
+
+    private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isAddingTextBox)
+        {
+            return;
+        }
+
+        var clickPosition = e.GetPosition(DrawingCanvas);
+
+        _newTextBox = new TextBox
+        {
+            Width = 200,
+            Height = 30,
+            Text = InputText,
+            FontSize = 14,
+            Foreground = _viewModel.SelectedBrush,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+        };
+
+        Canvas.SetLeft(_newTextBox, clickPosition.X);
+        Canvas.SetTop(_newTextBox, clickPosition.Y);
+
+        _newTextBox.GotFocus += TextBox_GotFocus;
+        _newTextBox.LostFocus += TextBox_LostFocus;
+
+        DrawingCanvas.Children.Add(_newTextBox);
+
+        _isAddingTextBox = false;
+        DrawingCanvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown;
+    }
+
+    private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox { Text: InputText } textBox)
+        {
+            return;
+        }
+        textBox.Text = "";
+    }
+
+    private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox textBox || !string.IsNullOrWhiteSpace(textBox.Text))
+        {
+            return;
+        }
+        textBox.Text = InputText;
+        textBox.Foreground = Brushes.Gray;
+    }
+    
+    private void AddTextWithBorder_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.DisableAllSelectCommands();
+        _isAddingTextBoxWithBorder = true;
+
+        DrawingCanvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown_ForBorderTextBox;
+    }
+
+    private void Canvas_MouseLeftButtonDown_ForBorderTextBox(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isAddingTextBoxWithBorder) return;
+
+        var clickPosition = e.GetPosition(DrawingCanvas);
+
+        var border = new Border
+        {
+            BorderBrush = _viewModel.SelectedBrush,
+            BorderThickness = new Thickness(1),
+            Background = Brushes.Black,
+            CornerRadius = new CornerRadius(4),
+            Padding = new Thickness(2),
+            SnapsToDevicePixels = true
+        };
+
+        var textBox = new TextBox
+        {
+            Text = InputText,
+            FontSize = 14,
+            Foreground = _viewModel.SelectedBrush,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            AcceptsReturn = true, 
+            TextWrapping = TextWrapping.Wrap, 
+            MinWidth = 50, 
+            MinHeight = 20
+        };
+
+        textBox.GotFocus += (_, _) =>
+        {
+            if (textBox.Text == InputText)
+            {
+                textBox.Text = "";
+                textBox.Foreground = Brushes.White;
+            }
+        };
+
+        textBox.LostFocus += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(textBox.Text))
+            {
+                textBox.Text = InputText;
+                textBox.Foreground = Brushes.Gray;
+            }
+        };
+
+        textBox.TextChanged += (_, _) =>
+        {
+            textBox.Width = MeasureTextWidth(textBox) + 10; 
+            textBox.Height = MeasureTextHeight(textBox) + 4; 
+        };
+
+        border.Child = textBox;
+
+        Canvas.SetLeft(border, clickPosition.X);
+        Canvas.SetTop(border, clickPosition.Y);
+
+        DrawingCanvas.Children.Add(border);
+
+        textBox.Focus();
+
+        _isAddingTextBoxWithBorder = false;
+        DrawingCanvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown_ForBorderTextBox;
+    }
+
+    
+   private static double MeasureTextWidth(TextBox textBox)
+{
+    var source = PresentationSource.FromVisual(textBox);
+    var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+
+    var formattedText = new FormattedText(
+        textBox.Text,
+        System.Globalization.CultureInfo.CurrentCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+        textBox.FontSize,
+        Brushes.Black,
+        pixelsPerDip);
+
+    return formattedText.Width;
+}
+
+private static double MeasureTextHeight(TextBox textBox)
+{
+    var source = PresentationSource.FromVisual(textBox);
+    var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+
+    var formattedText = new FormattedText(
+        textBox.Text,
+        System.Globalization.CultureInfo.CurrentCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+        textBox.FontSize,
+        Brushes.Black,
+        pixelsPerDip);
+
+    return formattedText.Height;
+}
+
+    private void EnableDragButton_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.DisableAllSelectCommands();
+        foreach (var child in DrawingCanvas.Children)
+        {
+            if (child is UIElement element)
+            {
+                _dragService.EnableDragging(element);
+            }
+        }
     }
 }
