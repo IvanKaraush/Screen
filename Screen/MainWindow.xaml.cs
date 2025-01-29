@@ -262,9 +262,12 @@ public partial class MainWindow
 
     private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (!_isAddingTextBox) return;
+        if (!_isAddingTextBox)
+        {
+            return;
+        }
 
-        Point clickPosition = e.GetPosition(DrawingCanvas);
+        var clickPosition = e.GetPosition(DrawingCanvas);
 
         _newTextBox = new TextBox
         {
@@ -291,13 +294,19 @@ public partial class MainWindow
 
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is not TextBox { Text: "Введите текст..." } textBox) return;
+        if (sender is not TextBox { Text: "Введите текст..." } textBox)
+        {
+            return;
+        }
         textBox.Text = "";
     }
 
     private void TextBox_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is not TextBox textBox || !string.IsNullOrWhiteSpace(textBox.Text)) return;
+        if (sender is not TextBox textBox || !string.IsNullOrWhiteSpace(textBox.Text))
+        {
+            return;
+        }
         textBox.Text = "Введите текст...";
         textBox.Foreground = Brushes.Gray;
     }
@@ -314,7 +323,7 @@ public partial class MainWindow
     {
         if (!_isAddingTextBoxWithBorder) return;
 
-        Point clickPosition = e.GetPosition(DrawingCanvas);
+        var clickPosition = e.GetPosition(DrawingCanvas);
 
         var border = new Border
         {
@@ -339,7 +348,7 @@ public partial class MainWindow
             MinHeight = 20
         };
 
-        textBox.GotFocus += (s, args) =>
+        textBox.GotFocus += (_, _) =>
         {
             if (textBox.Text == "Введите текст...")
             {
@@ -348,7 +357,7 @@ public partial class MainWindow
             }
         };
 
-        textBox.LostFocus += (s, args) =>
+        textBox.LostFocus += (_, _) =>
         {
             if (string.IsNullOrWhiteSpace(textBox.Text))
             {
@@ -357,7 +366,7 @@ public partial class MainWindow
             }
         };
 
-        textBox.TextChanged += (s, args) =>
+        textBox.TextChanged += (_, _) =>
         {
             textBox.Width = MeasureTextWidth(textBox) + 10; 
             textBox.Height = MeasureTextHeight(textBox) + 4; 
@@ -376,37 +385,40 @@ public partial class MainWindow
         DrawingCanvas.MouseLeftButtonDown -= Canvas_MouseLeftButtonDown_ForBorderTextBox;
     }
 
-    [Obsolete("Obsolete")]
-    private double MeasureTextWidth(TextBox textBox)
-    {
-        var formattedText = new FormattedText(
-            textBox.Text,
-            System.Globalization.CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
-            textBox.FontSize,
-            Brushes.Black,
-            new NumberSubstitution(),
-            TextFormattingMode.Display);
+    
+   private double MeasureTextWidth(TextBox textBox)
+{
+    var source = PresentationSource.FromVisual(textBox);
+    double pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
 
-        return formattedText.Width;
-    }
+    var formattedText = new FormattedText(
+        textBox.Text,
+        System.Globalization.CultureInfo.CurrentCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+        textBox.FontSize,
+        Brushes.Black,
+        pixelsPerDip);
 
-    [Obsolete("Obsolete")]
-    private double MeasureTextHeight(TextBox textBox)
-    {
-        var formattedText = new FormattedText(
-            textBox.Text,
-            System.Globalization.CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
-            textBox.FontSize,
-            Brushes.Black,
-            new NumberSubstitution(),
-            TextFormattingMode.Display);
+    return formattedText.Width;
+}
 
-        return formattedText.Height;
-    }
+private double MeasureTextHeight(TextBox textBox)
+{
+    var source = PresentationSource.FromVisual(textBox);
+    double pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+
+    var formattedText = new FormattedText(
+        textBox.Text,
+        System.Globalization.CultureInfo.CurrentCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight, textBox.FontStretch),
+        textBox.FontSize,
+        Brushes.Black,
+        pixelsPerDip);
+
+    return formattedText.Height;
+}
 
     private void EnableDragButton_Click(object sender, RoutedEventArgs e)
     {
