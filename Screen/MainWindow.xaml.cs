@@ -16,7 +16,6 @@ using Cursors = System.Windows.Input.Cursors;
 using FlowDirection = System.Windows.FlowDirection;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using TextBox = System.Windows.Controls.TextBox;
 
@@ -387,7 +386,7 @@ public partial class MainWindow
     }
 
     
-   private double MeasureTextWidth(TextBox textBox)
+   private static double MeasureTextWidth(TextBox textBox)
 {
     var source = PresentationSource.FromVisual(textBox);
     var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
@@ -404,7 +403,7 @@ public partial class MainWindow
     return formattedText.Width;
 }
 
-private double MeasureTextHeight(TextBox textBox)
+private static double MeasureTextHeight(TextBox textBox)
 {
     var source = PresentationSource.FromVisual(textBox);
     var pixelsPerDip = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
