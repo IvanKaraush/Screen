@@ -210,44 +210,28 @@ public partial class MainWindow
             ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
             : blurredBitmap.ToBitmapSource();
     }
-    
-    private void MakeCropButton(object sender, RoutedEventArgs e)
-    {
-        PreviewImage.Cursor = Cursors.Cross;
-        PreviewImage.MouseDown += PreviewImageCrop_MouseLeftButtonDown;
-        PreviewImage.MouseMove += PreviewImageCrop_MouseLeftButtonMove;
-        PreviewImage.MouseUp += PreviewImageCrop_MouseLeftButtonUp;
-    }
-
-    private void PreviewImageCrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        _croppingImageService.MouseLeftButtonDown(e.GetPosition(PreviewImage), PreviewImage.Parent as Canvas);
-    }
-
-    private void PreviewImageCrop_MouseLeftButtonMove(object sender, MouseEventArgs e)
-    {
-        _croppingImageService.MouseLeftButtonMove(e.GetPosition(PreviewImage));
-    }
-
-    private void PreviewImageCrop_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        PreviewImage.Cursor = Cursors.Arrow;
-        PreviewImage.MouseDown -= PreviewImageCrop_MouseLeftButtonDown;
-        PreviewImage.MouseMove -= PreviewImageCrop_MouseLeftButtonMove;
-        PreviewImage.MouseUp -= PreviewImageCrop_MouseLeftButtonUp;
-
-        _croppingImageService.SetImage((BitmapSource)PreviewImage.Source);
-
-        var croppedBitmap = _croppingImageService.MouseLeftButtonUp(PreviewImage.Parent as Canvas);
-
-        PreviewImage.Source = croppedBitmap == null
-            ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
-            : croppedBitmap.ToBitmapSource();
-    }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         var settingsWindow = new SettingsWindow();
         settingsWindow.ShowDialog();
+    }
+    
+    private void CropButton_Click(object sender, RoutedEventArgs e)
+    {
+        _croppingImageService.MakeCropping(DrawingCanvas, (BitmapSource)PreviewImage.Source);
+    }
+    
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control && PreviewImage.Source != null)
+        {
+            var croppedBitmap = _croppingImageService.CropImage();
+            PreviewImage.Source = croppedBitmap == null
+                ? throw new InvalidOperationException($"{nameof(BitmapImage)} cannot be null")
+                : croppedBitmap.ToBitmapSource();
+        }
+
+        base.OnKeyDown(e);
     }
 }

@@ -9,7 +9,7 @@
         </Grid.RowDefinitions>
         
         <ToolBar Grid.Row="0">
-			<Button Width="80" Height="80" Click="MakeCropButton">
+			<Button Width="80" Height="80" Click="CropButton_Click" >
                 <TextBlock FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center">✂</TextBlock>
 			</Button>
             <Button Width="80" Height="80"  Command="{Binding SelectRectangleCommand}">
